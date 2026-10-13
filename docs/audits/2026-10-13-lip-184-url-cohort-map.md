@@ -5,7 +5,7 @@
 
 ## Page-level GSC cohorts
 
-The October 6 audit reports these URL-family aggregates for `sc-domain:thelippincottteam.com`. The prior window is April 8–July 6, 2026; the recent window is July 7–October 4, 2026. “URL rows” count returned URLs, including variants. They are not unique-page, indexed-page, or property counts.
+The October 6 audit reports these URL-family aggregates for `sc-domain:thelippincottteam.com`. The prior window is April 8 to July 6, 2026; the recent window is July 7 to October 4, 2026. “URL rows” count returned URLs, including variants. They are not unique-page, indexed-page, or property counts.
 
 | Page family | Prior 90-day URL rows / page clicks | Recent 90-day URL rows / page clicks | Cohort treatment |
 | --- | ---: | ---: | --- |
@@ -41,7 +41,7 @@ The companion workbook’s `Migration Routes` tab records 17 live probes on Octo
 | MIG-016 | `https://www.thelippincottteam.com/property-search/detail/70/50914160/5623-sycamore-creek-drive-houston-tx-77345/` | 302 once to same non-www path, then 404; 404 canonical. | Separate retired-listing candidate. LIP-57 still needs the owner/content-rights decision; do not combine with MIG-015 or redirect to generic search. |
 | MIG-017 | `https://www.thelippincottteam.com/property-search/search-form/` | 302 once to same non-www path, then 404; 404 canonical. | Legacy IDX search-form cohort. LIP-55/LIP-105 need the approved general-search destination and query/filter contract. |
 
-The first ten rows show the tested `lippincottteam.com` paths preserving their path on a one-hop permanent move to `thelippincottteam.com`. Rows MIG-011–017 test a different host cohort: `www.thelippincottteam.com` normalizes temporarily to non-www. Do not treat those host families as one migration rule. The probe records reflect October 6 responses; later code changes do not establish current production status.
+The first ten rows show the tested `lippincottteam.com` paths preserving their path on a one-hop permanent move to `thelippincottteam.com`. Rows MIG-011 through MIG-017 test a different host cohort: `www.thelippincottteam.com` normalizes temporarily to non-www. Do not treat those host families as one migration rule. The probe records reflect October 6 responses; later code changes do not establish current production status.
 
 ## Cohorts supported by records
 
@@ -55,7 +55,7 @@ The first ten rows show the tested `lippincottteam.com` paths preserving their p
 | Legacy unpublished community path | `/northwest-houston-real-estate/katy-tx-real-estate/cimarron-real-estate/` | Current repository rule maps to the Katy guide. The code records the guide as unpublished because the team does not sell there. | `public/_redirects` and `astro.config.mjs`. Do not extend this exact disposition to other community URLs. |
 | Retired-listing candidates (keep separate by property) | `/property-search/detail/70/50208824/4710-oakbluff-court-fulshear-tx-77441/`; `/property-search/detail/70/50914160/5623-sycamore-creek-drive-houston-tx-77345/` | LIP-21 records the first property sold 2026-05-22 and the second sold 2026-07-31. They are retirement candidates, not approved retirement decisions: keep each property's record separate; no generic-search or homepage substitute. | `docs/audits/2026-10-13-lip-21-recovery-disposition.md` links the HAR record for Oakbluff and the brokerage sold-history record for Sycamore Creek. LIP-56/LIP-57 still require owner/content-rights disposition. Do not mix these two property URLs into retained page totals. |
 | Legacy IDX search-form | `/property-search/search-form/` | Unresolved legacy-search cohort. No redirect is approved until the equivalent general-search destination and legacy filter/query contract are confirmed; the featured-only AI search is not assumed equivalent. | Both historical URL recovery audit notes and PR #85 disposition. This route is not a property detail and must not be grouped with either sold listing. |
-| Other disposition exceptions | `/sellers/home-sale-calculator/`; short Tomball cost-of-living path | Keep separate under LIP-58 and LIP-103. MIG-013 proves the seller route currently completes two redirects to `/sell/`; MIG-014 proves the long article path works after a temporary host redirect. | The short Tomball route remains untested. A working status alone does not establish intent equivalence for the calculator route. |
+| Other disposition exceptions | `/sellers/home-sale-calculator/`; short Tomball cost-of-living path | Keep separate under LIP-58 and LIP-103. MIG-013 records two redirects from the seller route to `/sell/` in the October 6 probe; MIG-014 proves the long article path worked after a temporary host redirect. | The short Tomball route remains untested. A working status alone does not establish intent equivalence for the calculator route. |
 
 ## Partition rules for LIP-51 / LIP-185
 
@@ -67,7 +67,7 @@ The first ten rows show the tested `lippincottteam.com` paths preserving their p
 
 ## Coverage boundary and next evidence needed
 
-The cited Library sources are now available and reviewed: `lippincott-search-growth-audit.pdf` (pages 4–6, 10–13, 27) and `lippincott-search-audit-inventory.xlsx` (`URL Inventory`, `Migration Routes`, and GSC tabs), both dated October 6, 2026. The 70-row URL Inventory tab covers the current sitemap and raw HTML checks. It does not cover the complete former 23,000-plus IDX inventory. The 17 route probes and their outcomes appear above; they provide targeted examples, not a complete historical crawl.
+The cited Library sources are now available and reviewed: `lippincott-search-growth-audit.pdf` (pages 4 to 6, 10 to 13, and 27) and `lippincott-search-audit-inventory.xlsx` (`URL Inventory`, `Migration Routes`, and GSC tabs), both dated October 6, 2026. The 70-row URL Inventory tab covers the current sitemap and raw HTML checks. It does not cover the complete former 23,000-plus IDX inventory. The 17 route probes and their outcomes appear above; they provide targeted examples, not a complete historical crawl.
 
 To extend the row-level crosswalk beyond the 17 probes, obtain an authorized historical IDX URL/listing export with source URL, tested date, response/redirect chain, destination, identity/MLS key, rights/disposition decision, and source for each fact. The audit also lacks an owner-provided dated domain/platform/IDX change log around July 3 and August 25. Keep unlisted routes and that timeline unverified; the GSC family totals do not supply the missing listing identities or explain ranking changes.
 
