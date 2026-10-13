@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { approvedMappings, buildCases, findCanonical, probeRoute } from './audit/verify-historical-url-recovery.mjs';
+import { approvedMappings, buildCases, findCanonical, findHeading, probeRoute } from './audit/verify-historical-url-recovery.mjs';
 
 const base = 'https://thelippincottteam.com';
 const source = `${base}/contact/?utm_source=lip21_audit&tag=a&tag=b&empty=`;
@@ -103,4 +103,24 @@ test('body read failures produce an explicit failed result rather than aborting 
   assert.equal(result.final.status, 200);
   assert.match(result.error, /HTTP body unavailable: stream reset/);
   assert.equal(result.hops.length, 1);
+});
+
+test('rejects a branded soft 404 that returns HTTP 200, matching canonical and any H1', async () => {
+  const branded404 = '<html><head><link rel="canonical" href="https://thelippincottteam.com/contact-us/"></head><body><h1>Page not found</h1></body></html>';
+  const result = await probeRoute(source, '/contact-us/', { fetchImpl: mock(new Map([
+    [source, reply(301, target)],
+    [target, reply(200, null, branded404)],
+  ])) });
+  assert.equal(result.passed, false);
+  assert.match(result.error, /H1 does not identify expected page/);
+});
+
+test('recognizes nested heading spans and requires a known approved destination', async () => {
+  const split = '<h1>Tell us about <span>your move.</span></h1>';
+  assert.equal(findHeading(split), 'Tell us about your move.');
+  const unapproved = await probeRoute(source, '/unapproved/', {
+    fetchImpl: async () => { throw new Error('should not request'); },
+  });
+  assert.equal(unapproved.passed, false);
+  assert.match(unapproved.error, /not approved/);
 });
