@@ -11,8 +11,8 @@ const redirectStatuses = new Set([301, 302, 303, 307, 308]);
 const sampleQuery = '?utm_source=lip21_audit&tag=a&tag=b&empty=';
 
 export const approvedMappings = Object.freeze([
-  { oldPath: '/agents/amy-lippincott/', newPath: '/about/amy-lippincott-2/', label: 'Amy profile' },
-  { oldPath: '/contact/', newPath: '/contact-us/', label: 'Contact' },
+  { oldPath: '/agents/amy-lippincott/', newPath: '/about/amy-lippincott-2/', label: 'Amy profile', expectedHeading: 'Amy Lippincott' },
+  { oldPath: '/contact/', newPath: '/contact-us/', label: 'Contact', expectedHeading: 'Tell us about your move' },
 ]);
 
 function htmlAttribute(tag, name) {
@@ -30,10 +30,20 @@ export function findCanonical(html) {
   return null;
 }
 
+export function findHeading(html) {
+  const match = html.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i);
+  return match ? match[1].replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() : null;
+}
+
 // One probe, with a hard hop limit and no tolerance for a temporary redirect.
 export async function probeRoute(sourceUrl, expectedPath, { method = 'GET', fetchImpl = fetch } = {}) {
   const expected = new URL(expectedPath + new URL(sourceUrl).search, canonicalOrigin).href;
   const result = { source: sourceUrl, expected, method, passed: false, hops: [], final: null, canonical: null, error: null };
+  const expectedHeading = approvedMappings.find(mapping => mapping.newPath === expectedPath)?.expectedHeading;
+  if (!expectedHeading) {
+    result.error = `Destination not approved for a content-specific acceptance check: ${expectedPath}`;
+    return result;
+  }
   const visited = new Set();
   let current = sourceUrl;
 
@@ -89,8 +99,13 @@ export async function probeRoute(sourceUrl, expectedPath, { method = 'GET', fetc
       const expectedCanonical = new URL(expectedPath, canonicalOrigin).href;
       if (result.canonical !== expectedCanonical) {
         result.error = `Canonical mismatch: ${result.canonical ?? 'missing'}; expected ${expectedCanonical}`;
-      } else if (!/<h1\b[^>]*>/.test(html)) {
-        result.error = 'Destination has no H1 (possible empty/soft-404 response)';
+      } else {
+        const heading = findHeading(html);
+        if (!heading) {
+          result.error = 'Destination has no H1 (possible empty/soft-404 response)';
+        } else if (!heading.toLowerCase().includes(expectedHeading.toLowerCase())) {
+          result.error = `Destination H1 does not identify expected page: ${heading}`;
+        }
       }
     }
     result.passed = !result.error;
