@@ -78,7 +78,13 @@ export async function probeRoute(sourceUrl, expectedPath, { method = 'GET', fetc
     } else if (response.status !== 200) {
       result.error = `Final page returned HTTP ${response.status}, not 200`;
     } else if (method === 'GET') {
-      const html = await response.text();
+      let html;
+      try {
+        html = await response.text();
+      } catch (error) {
+        result.error = `HTTP body unavailable: ${error instanceof Error ? error.message : String(error)}`;
+        return result;
+      }
       result.canonical = findCanonical(html);
       const expectedCanonical = new URL(expectedPath, canonicalOrigin).href;
       if (result.canonical !== expectedCanonical) {
@@ -99,7 +105,7 @@ export function buildCases({ allHosts = false } = {}) {
   const hosts = ['https://thelippincottteam.com', 'https://www.thelippincottteam.com'];
   if (allHosts) hosts.push('http://thelippincottteam.com', 'http://www.thelippincottteam.com');
   return approvedMappings.flatMap(({ oldPath, newPath, label }) =>
-    hosts.flatMap(host => [oldPath, oldPath.slice(0, -1)].flatMap(path =>
+    hosts.flatMap(host => [oldPath, oldPath.replace(/\/$/, '')].flatMap(path =>
       ['GET', 'HEAD'].map(method => ({
         label,
         source: host + path + sampleQuery,
