@@ -89,3 +89,18 @@ test('network failures are reported as unverified, never as a passing result', a
   assert.equal(result.passed, false);
   assert.match(result.error, /DNS unavailable/);
 });
+
+test('body read failures produce an explicit failed result rather than aborting the run', async () => {
+  const result = await probeRoute(source, '/contact-us/', { fetchImpl: async url => {
+    if (url === source) return reply(301, target);
+    return {
+      status: 200,
+      headers: new Headers({ 'content-type': 'text/html' }),
+      async text() { throw new Error('stream reset'); },
+    };
+  }});
+  assert.equal(result.passed, false);
+  assert.equal(result.final.status, 200);
+  assert.match(result.error, /HTTP body unavailable: stream reset/);
+  assert.equal(result.hops.length, 1);
+});
