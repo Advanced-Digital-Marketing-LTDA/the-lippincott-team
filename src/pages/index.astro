@@ -47,7 +47,23 @@ const jsonld = [
 					},
 				}
 			: {}),
-		employee: { '@type': 'Person', name: 'Amy Lippincott', jobTitle: 'Broker', url: new URL('/about/amy-lippincott-2/', mediaSite).href },
+		employee: {
+			'@type': 'Person',
+			name: 'Amy Lippincott',
+			jobTitle: 'Broker',
+			url: new URL('/about/amy-lippincott-2/', mediaSite).href,
+			// The HAR.com rating belongs to Amy's profile, so it attaches to her rather than the team entity.
+			...(agent.rating
+				? {
+						aggregateRating: {
+							'@type': 'AggregateRating',
+							ratingValue: agent.rating,
+							bestRating: '5',
+							reviewCount: agent.reviewCount ?? undefined,
+						},
+					}
+				: {}),
+		},
 		...(phone ? { telephone: telHref(phone)?.replace(/^tel:/, '') } : {}),
 		...(email ? { email } : {}),
 		...(config?.seo?.brandSubtitle
@@ -57,16 +73,6 @@ const jsonld = [
 			.filter((a) => a !== null)
 			.map((a) => ({ '@type': a.kind ?? 'Place', name: a.name })),
 		...(agent.award ? { award: agent.award } : {}),
-		...(agent.rating
-			? {
-					aggregateRating: {
-						'@type': 'AggregateRating',
-						ratingValue: agent.rating,
-						bestRating: '5',
-						reviewCount: agent.reviewCount ?? undefined,
-					},
-				}
-			: {}),
 	},
 	faqItems.length > 0 && {
 		'@context': 'https://schema.org',
