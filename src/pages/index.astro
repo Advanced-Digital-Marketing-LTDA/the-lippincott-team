@@ -26,24 +26,52 @@ const sameAs = [
 	'https://www.har.com/amy-lippincott/ratings_586048',
 	'https://www.google.com/maps/place/The+Lippincott+Team/data=!4m2!3m1!1s0x0:0xccd4dfcb53365f86',
 ].filter((u): u is string => typeof u === 'string' && u.startsWith('https://'));
+// "17803 W Cypress Hill Circle\nCypress, TX 77433" -> PostalAddress parts (null when the format differs).
+const addressMatch = /^(.+)\n(.+?),\s*([A-Z]{2})\s+(\d{5})$/.exec(config?.contact?.address?.trim() ?? '');
+const address = addressMatch
+	? { street: addressMatch[1], city: addressMatch[2], region: addressMatch[3], postalCode: addressMatch[4] }
+	: null;
 const faqItems = (data.faq?.items ?? []).filter((q) => q !== null).filter((q) => q.question?.trim() && hasRichText(q.answer));
 const jsonld = [
 	agent && {
 		'@context': 'https://schema.org',
 		'@type': 'RealEstateAgent',
+		'@id': Astro.site ? `${Astro.site.href}#team` : undefined,
 		name: config?.seo?.title ?? undefined,
 		description: agent.description ?? undefined,
 		url: Astro.site?.href,
+		...(config?.seo?.logo ? { logo: new URL(mediaUrl(config.seo.logo, mediaSite), mediaSite).href } : {}),
+		...(address
+			? {
+					address: {
+						'@type': 'PostalAddress',
+						streetAddress: address.street,
+						addressLocality: address.city,
+						addressRegion: address.region,
+						postalCode: address.postalCode,
+						addressCountry: 'US',
+					},
+				}
+			: {}),
+		employee: {
+			'@type': 'Person',
+			name: 'Amy Lippincott',
+			jobTitle: 'Broker',
+			url: new URL('/about/amy-lippincott-2/', mediaSite).href,
+			// The HAR.com rating belongs to Amy's profile, so it attaches to her rather than the team entity.
+			...(agent.rating
+				? {
+						aggregateRating: {
+							'@type': 'AggregateRating',
+							ratingValue: agent.rating,
+							bestRating: '5',
+							reviewCount: agent.reviewCount ?? undefined,
+						},
+					}
+				: {}),
+		},
 		...(phone ? { telephone: telHref(phone)?.replace(/^tel:/, '') } : {}),
 		...(email ? { email } : {}),
-		address: {
-			'@type': 'PostalAddress',
-			streetAddress: '17803 W Cypress Hill Circle',
-			addressLocality: 'Cypress',
-			addressRegion: 'TX',
-			postalCode: '77433',
-			addressCountry: 'US',
-		},
 		sameAs,
 		...(config?.seo?.brandSubtitle
 			? { parentOrganization: { '@type': 'Organization', name: config.seo.brandSubtitle } }
@@ -52,16 +80,6 @@ const jsonld = [
 			.filter((a) => a !== null)
 			.map((a) => ({ '@type': a.kind ?? 'Place', name: a.name })),
 		...(agent.award ? { award: agent.award } : {}),
-		...(agent.rating
-			? {
-					aggregateRating: {
-						'@type': 'AggregateRating',
-						ratingValue: agent.rating,
-						bestRating: '5',
-						reviewCount: agent.reviewCount ?? undefined,
-					},
-				}
-			: {}),
 	},
 	faqItems.length > 0 && {
 		'@context': 'https://schema.org',
