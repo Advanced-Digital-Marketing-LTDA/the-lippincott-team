@@ -20,6 +20,12 @@ const config = (await getConfig()).data?.config ?? null;
 const phone = config?.contact?.phone ?? null;
 const email = data.finalCta?.email?.trim() ? data.finalCta.email : (config?.contact?.email ?? null);
 const agent = data.agentSchema;
+// Official profiles: the site's own social links plus the HAR.com agent profile and Google Business Profile.
+const sameAs = [
+	...(config?.contactLinks ?? []).map((l) => l?.link),
+	'https://www.har.com/amy-lippincott/ratings_586048',
+	'https://www.google.com/maps/place/The+Lippincott+Team/data=!4m2!3m1!1s0x0:0xccd4dfcb53365f86',
+].filter((u): u is string => typeof u === 'string' && u.startsWith('https://'));
 const faqItems = (data.faq?.items ?? []).filter((q) => q !== null).filter((q) => q.question?.trim() && hasRichText(q.answer));
 const jsonld = [
 	agent && {
@@ -30,6 +36,15 @@ const jsonld = [
 		url: Astro.site?.href,
 		...(phone ? { telephone: telHref(phone)?.replace(/^tel:/, '') } : {}),
 		...(email ? { email } : {}),
+		address: {
+			'@type': 'PostalAddress',
+			streetAddress: '17803 W Cypress Hill Circle',
+			addressLocality: 'Cypress',
+			addressRegion: 'TX',
+			postalCode: '77433',
+			addressCountry: 'US',
+		},
+		sameAs,
 		...(config?.seo?.brandSubtitle
 			? { parentOrganization: { '@type': 'Organization', name: config.seo.brandSubtitle } }
 			: {}),
