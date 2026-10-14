@@ -30,7 +30,7 @@ const jsonld = [
 	agent && {
 		'@context': 'https://schema.org',
 		'@type': 'RealEstateAgent',
-		'@id': `${Astro.site?.href ?? ''}#team`,
+		'@id': Astro.site ? `${Astro.site.href}#team` : undefined,
 		name: config?.seo?.title ?? undefined,
 		description: agent.description ?? undefined,
 		url: Astro.site?.href,
