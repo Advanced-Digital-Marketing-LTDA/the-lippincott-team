@@ -20,10 +20,9 @@ const config = (await getConfig()).data?.config ?? null;
 const phone = config?.contact?.phone ?? null;
 const email = data.finalCta?.email?.trim() ? data.finalCta.email : (config?.contact?.email ?? null);
 const agent = data.agentSchema;
-// Official profiles: the site's own social links plus the HAR.com agent profile and Google Business Profile.
+// Team profiles: the site's own social links plus the Google Business Profile. The HAR.com profile is Amy's, so it sits on her Person node.
 const sameAs = [
 	...(config?.contactLinks ?? []).map((l) => l?.link),
-	'https://www.har.com/amy-lippincott/ratings_586048',
 	'https://www.google.com/maps/place/The+Lippincott+Team/data=!4m2!3m1!1s0x0:0xccd4dfcb53365f86',
 ].filter((u): u is string => typeof u === 'string' && u.startsWith('https://'));
 // "17803 W Cypress Hill Circle\nCypress, TX 77433" -> PostalAddress parts (null when the format differs).
@@ -58,6 +57,7 @@ const jsonld = [
 			name: 'Amy Lippincott',
 			jobTitle: 'Broker',
 			url: new URL('/about/amy-lippincott-2/', mediaSite).href,
+			sameAs: ['https://www.har.com/amy-lippincott/ratings_586048'],
 			// The HAR.com rating belongs to Amy's profile, so it attaches to her rather than the team entity.
 			...(agent.rating
 				? {
