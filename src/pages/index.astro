@@ -47,7 +47,7 @@ const jsonld = [
 					},
 				}
 			: {}),
-		employee: { '@type': 'Person', name: 'Amy Lippincott', jobTitle: 'Broker' },
+		employee: { '@type': 'Person', name: 'Amy Lippincott', jobTitle: 'Broker', url: new URL('/about/amy-lippincott-2/', mediaSite).href },
 		...(phone ? { telephone: telHref(phone)?.replace(/^tel:/, '') } : {}),
 		...(email ? { email } : {}),
 		...(config?.seo?.brandSubtitle
