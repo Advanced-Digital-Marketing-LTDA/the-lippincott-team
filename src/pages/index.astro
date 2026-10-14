@@ -20,14 +20,34 @@ const config = (await getConfig()).data?.config ?? null;
 const phone = config?.contact?.phone ?? null;
 const email = data.finalCta?.email?.trim() ? data.finalCta.email : (config?.contact?.email ?? null);
 const agent = data.agentSchema;
+// "17803 W Cypress Hill Circle\nCypress, TX 77433" -> PostalAddress parts (null when the format differs).
+const addressMatch = /^(.+)\n(.+?),\s*([A-Z]{2})\s+(\d{5})$/.exec(config?.contact?.address?.trim() ?? '');
+const address = addressMatch
+	? { street: addressMatch[1], city: addressMatch[2], region: addressMatch[3], postalCode: addressMatch[4] }
+	: null;
 const faqItems = (data.faq?.items ?? []).filter((q) => q !== null).filter((q) => q.question?.trim() && hasRichText(q.answer));
 const jsonld = [
 	agent && {
 		'@context': 'https://schema.org',
 		'@type': 'RealEstateAgent',
+		'@id': `${Astro.site?.href ?? ''}#team`,
 		name: config?.seo?.title ?? undefined,
 		description: agent.description ?? undefined,
 		url: Astro.site?.href,
+		...(config?.seo?.logo ? { logo: new URL(mediaUrl(config.seo.logo, mediaSite), mediaSite).href } : {}),
+		...(address
+			? {
+					address: {
+						'@type': 'PostalAddress',
+						streetAddress: address.street,
+						addressLocality: address.city,
+						addressRegion: address.region,
+						postalCode: address.postalCode,
+						addressCountry: 'US',
+					},
+				}
+			: {}),
+		employee: { '@type': 'Person', name: 'Amy Lippincott', jobTitle: 'Broker' },
 		...(phone ? { telephone: telHref(phone)?.replace(/^tel:/, '') } : {}),
 		...(email ? { email } : {}),
 		...(config?.seo?.brandSubtitle
