@@ -1,7 +1,7 @@
 name: AI review
 
-# Paid. Requires the ANTHROPIC_API_KEY repository secret. Skipped for fork PRs
-# (secrets are not exposed to them).
+# Paid. Requires the ANTHROPIC_API_KEY repository secret; jobs are skipped until it is set.
+# Also skipped for fork PRs (secrets are not exposed to them).
 
 on:
   pull_request:
@@ -12,15 +12,26 @@ permissions:
   pull-requests: write
 
 jobs:
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      has_key: ${{ steps.check.outputs.has_key }}
+    steps:
+      - id: check
+        env:
+          KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: echo "has_key=${KEY:+true}" >> "$GITHUB_OUTPUT"
+
   adversarial-review:
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    needs: gate
+    if: github.event.pull_request.head.repo.full_name == github.repository && needs.gate.outputs.has_key == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version-file: .nvmrc
       - name: Adversarial review
@@ -38,10 +49,11 @@ jobs:
           path: review.json
 
   pr-review-toolkit:
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    needs: gate
+    if: github.event.pull_request.head.repo.full_name == github.repository && needs.gate.outputs.has_key == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 1
           persist-credentials: false
