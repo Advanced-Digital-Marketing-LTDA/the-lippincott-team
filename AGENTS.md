@@ -408,3 +408,14 @@ on Coolify keep the Build Variable flag **off** (runtime-only).
 - `BUNNY_PURGE_SECRET` — shared secret authorizing `/api/bunny-purge` (per-page purges between
   deploys). Generate with `openssl rand -hex 32`. Optional (the endpoint answers 503 without it).
 - `DEPLOY_ADAPTER` — optional adapter override.
+
+## Review tooling
+
+- Before PR, on every change: run the `pr-test-analyzer` and `silent-failure-hunter` agents (PR Review
+  Toolkit plugin, enabled in `.claude/settings.json`).
+- Before every push: run the `adversarial-review` project skill (`.claude/skills/adversarial-review/`;
+  needs `ANTHROPIC_API_KEY`, or a local `claude`/`codex` CLI on `PATH`).
+- gstack `/cso` (`npx skills add https://github.com/garrytan/gstack --skill cso`) applies only if auth or
+  owner-scoping is ever added; this site has none. No `/test-audit` skill was found in gstack.
+- CI: `.github/workflows/ratchets.yml` (free: test, suppress and type ratchets) and
+  `.github/workflows/ai-review.yml` (paid, needs the `ANTHROPIC_API_KEY` repo secret).

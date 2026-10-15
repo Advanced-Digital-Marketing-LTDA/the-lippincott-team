@@ -1,0 +1,49 @@
+name: AI review
+
+# Paid. Requires the ANTHROPIC_API_KEY repository secret. Skipped for fork PRs
+# (secrets are not exposed to them).
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  adversarial-review:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Adversarial review
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          set -o pipefail
+          npx --yes adversarial-review@2.11.1 --base "origin/${{ github.base_ref }}" \
+            --passes 2 --verify --fail-on high --fail-on-empty --json | tee review.json
+
+  pr-review-toolkit:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          plugin_marketplaces: https://github.com/anthropics/claude-code.git
+          plugins: pr-review-toolkit@claude-code-plugins
+          prompt: |
+            Review PR ${{ github.repository }}#${{ github.event.pull_request.number }} using the
+            pr-test-analyzer and silent-failure-hunter agents. Post one summary comment.
