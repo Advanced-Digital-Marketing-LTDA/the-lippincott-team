@@ -26,9 +26,10 @@ jobs:
       - name: Adversarial review
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          BASE_REF: ${{ github.base_ref }}
         run: |
           set -o pipefail
-          npx --yes adversarial-review@2.11.1 --base "origin/${{ github.base_ref }}" \
+          npx --yes adversarial-review@2.11.1 --base "origin/$BASE_REF" \
             --passes 2 --verify --fail-on high --fail-on-empty --json | tee review.json
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
