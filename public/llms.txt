@@ -55,6 +55,6 @@ Contact: 713-494-1818 · amy@lippincottteam.com · https://thelippincottteam.com
 ## Notes for LLMs
 
 - Market figures in the community and school pages carry their cited source, reporting period and
-  property scope on the page; school facts cite district or state sources.
+  property scope on the page; school facts cite their published sources.
   Quote a stat together with its cited source and reporting period.
 - Property search is hosted externally on the team's Sierra site, linked from community pages.
