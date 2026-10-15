@@ -19,15 +19,15 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - uses: motchalini-llc/test-ratchet@v1
+      - uses: motchalini-llc/test-ratchet@179a93cd0f66d2690944ccafdf77f83ff6175ef3 # v1
         with:
           language: typescript
           baseline-skip: '0'
-      - uses: motchalini-llc/suppress-ratchet@v1
+      - uses: motchalini-llc/suppress-ratchet@7d9b6e088379625af9c6613c7ca7f2f402afa568 # v1
         with:
           language: typescript
           baseline-suppress: '0'
-      - uses: motchalini-llc/type-ratchet@v1
+      - uses: motchalini-llc/type-ratchet@c009fc38175c9e8970b832fe021eceb638332801 # v1
         with:
           language: typescript
           baseline-any: '2'

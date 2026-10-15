@@ -30,6 +30,11 @@ jobs:
           set -o pipefail
           npx --yes adversarial-review@2.11.1 --base "origin/${{ github.base_ref }}" \
             --passes 2 --verify --fail-on high --fail-on-empty --json | tee review.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: adversarial-review-${{ github.event.pull_request.number }}
+          path: review.json
 
   pr-review-toolkit:
     if: github.event.pull_request.head.repo.full_name == github.repository
@@ -39,7 +44,7 @@ jobs:
         with:
           fetch-depth: 1
           persist-credentials: false
-      - uses: anthropics/claude-code-action@v1
+      - uses: anthropics/claude-code-action@a26b07d8c778b0c43f64618e5fd29fd0f8af72e8 # v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           plugin_marketplaces: https://github.com/anthropics/claude-code.git
