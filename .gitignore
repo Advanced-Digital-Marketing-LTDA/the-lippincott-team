@@ -73,7 +73,9 @@ scripts/migrate/data/
 dist
 .serena
 .idea
-.claude
+.claude/*
+!.claude/settings.json
+!.claude/skills/
 .astro
 # impeccable-ignore-start
 # Ephemeral output, runtime state, and per-dev overrides.

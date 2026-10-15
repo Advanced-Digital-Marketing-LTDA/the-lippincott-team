@@ -1,0 +1,71 @@
+name: AI review
+
+# Paid. Requires the ANTHROPIC_API_KEY repository secret; jobs are skipped until it is set.
+# Also skipped for fork PRs (secrets are not exposed to them).
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      has_key: ${{ steps.check.outputs.has_key }}
+    steps:
+      - id: check
+        env:
+          KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: echo "has_key=${KEY:+true}" >> "$GITHUB_OUTPUT"
+
+  adversarial-review:
+    needs: gate
+    if: github.event.pull_request.head.repo.full_name == github.repository && needs.gate.outputs.has_key == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: .nvmrc
+      - name: Adversarial review
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set -o pipefail
+          npm install --no-save --ignore-scripts adversarial-review@2.11.1
+          ./node_modules/.bin/adversarial-review --base "origin/$BASE_REF" \
+            --passes 2 --verify --fail-on high --fail-on-empty --json | tee review.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: adversarial-review-${{ github.event.pull_request.number }}
+          path: review.json
+
+  pr-review-toolkit:
+    needs: gate
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+    if: github.event.pull_request.head.repo.full_name == github.repository && needs.gate.outputs.has_key == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - uses: anthropics/claude-code-action@a26b07d8c778b0c43f64618e5fd29fd0f8af72e8 # v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          plugin_marketplaces: https://github.com/anthropics/claude-code.git
+          plugins: pr-review-toolkit@claude-code-plugins
+          prompt: |
+            Review PR ${{ github.repository }}#${{ github.event.pull_request.number }} using the
+            pr-test-analyzer and silent-failure-hunter agents. Post one summary comment.
