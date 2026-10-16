@@ -17,5 +17,5 @@ jobs:
       contents: read
       security-events: write
       actions: read
-    # Langlo main, merge of PR 42
-    uses: Advanced-Digital-Marketing-LTDA/Langlo/.github/workflows/reusable-ossar.yml@9a946fb019ef1108cd461c1682cd4515a0244683
+    # Langlo main, merge of PR 43
+    uses: Advanced-Digital-Marketing-LTDA/Langlo/.github/workflows/reusable-ossar.yml@84ea435ca4f47cc9d1f77c6b043526ae2e9c5afd
