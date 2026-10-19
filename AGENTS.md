@@ -61,9 +61,8 @@ From `package.json`:
   search-index`. `pnpm preview` — `astro preview`.
 
 The build scripts prefix `NODE_ENV=production` on purpose: the tinacms CLI bundles its config via Vite
-in-process, and Vite defaults `NODE_ENV` to `development` when unset — without the prefix it leaks into
-`astro build`, flips `import.meta.env.PROD` to false, and silently drops the production-only GA4 snippet
-(see Analytics under Deployment).
+in-process, and Vite defaults `NODE_ENV` to `development` when unset. Keep the prefix so the Astro build
+receives production semantics.
 
 **Build order matters**: `tinacms build` must run before `astro build` so `tina/__generated__/` exists.
 Always use the scripts above, never bare `astro build`.
@@ -281,7 +280,7 @@ Run `pnpm test` for the configured regression suite. No linter or formatter is c
 - Visual iteration: `npx astro dev --port 4322` (not `pnpm dev`) + screenshots — component/CSS edits
   hot-reload in under a second; the separate port keeps a `pnpm preview` server on 4321. Reserve
   `NODE_ENV=production pnpm build:local` + `pnpm preview` for per-task gates, Tina schema changes,
-  production-only behavior (`compressHTML`, GA4 gating, island endpoints), and final evidence shots. See
+  production-only behavior (`compressHTML`, island endpoints), and final evidence shots. See
   the `visual-loop` skill for the full loop, and the seeded-cache/client-pointer caveats under "Build
   and dev commands" before iterating against bare `astro dev`.
 - CI: `.github/workflows/tina-lock.yml` runs `pnpm build:local` on PRs to `main` and fails if
@@ -315,7 +314,7 @@ re-ignore the lockfile.
 `EXPOSE`. Required env: `PUBLIC_TINA_CLIENT_ID`, `TINA_TOKEN`, `SITE_URL`. The Dockerfile `HEALTHCHECK`
 (node fetch on `/`) is parsed by Coolify, takes precedence over UI checks, and gates Traefik routing +
 rolling updates. The container needs egress to TinaCloud (`content.tina.io` / `app.tina.io`) for content
-and visual editing; stateless, no volumes. `CONTEXT` is unset there, so production builds include GA4.
+and visual editing; stateless, no volumes. The GTM container is embedded in the rendered site HTML.
 
 **CDN (Bunny)**: `PUBLIC_CDN_MODE=full-site` (also absent/blank) retains the setup below.
 `media-only` serves the website directly from Coolify and resolves owned `/uploads/` through
@@ -373,16 +372,10 @@ every adapter) and additionally by `public/_redirects`, which Netlify's CDN read
 `/opt-out-preferences/*`, `/team-member-page-design/`, and `/author/*` 301 to their closest equivalents;
 all other migrated WP URLs map 1:1 onto existing routes.
 
-Analytics: GA4 loads via a single inline script at the end of `<body>` in `src/layouts/Base.astro`,
-gated on `import.meta.env.PROD` **and** Netlify's `CONTEXT` being `production` (or unset) — which is why
-the build scripts force `NODE_ENV=production` (see "Build and dev commands"). Deploy previews and branch
-deploys (`CONTEXT=deploy-preview`/`branch-deploy`) and local dev are excluded. Measurement ID from
-`PUBLIC_GA_ID` (default `G-ZREVRSHYJB`). The inline script starts the `dataLayer` queue immediately (so
-the initial `page_view` and `<ClientRouter/>` re-fires are captured from page load), but gtag.js itself
-is interaction/idle-gated: injected on the first `pointerdown`/`keydown`/`scroll`/`touchstart` or after
-a 6 s idle fallback, because its bootstrap does forced-reflow layout queries (~150 ms in PSI traces)
-that no script placement can avoid. `data-astro-rerun` keeps navigations sending pageviews; a
-`window.__gaLoaderBound` guard (window survives ClientRouter swaps) prevents double-binding on reruns.
+Analytics: Google Tag Manager uses container `GTM-WM5FTV8R` in
+`src/layouts/Base.astro`. Its async script is first in `<head>` and its no-script
+iframe immediately follows `<body>`. Analytics tags are managed through GTM; no
+GA4/gtag.js tag is embedded directly in the site.
 
 Environment variables (see `.env.example`). Shared rule for the secrets (`SIERRA_API_KEY`,
 `BUNNY_API_KEY`, `BUNNY_PULL_ZONE_ID`, `BUNNY_PURGE_SECRET`): never commit, never `PUBLIC_` prefix, and
@@ -392,7 +385,6 @@ on Coolify keep the Build Variable flag **off** (runtime-only).
   Workers does not — set it there**; set it on Coolify too (`COOLIFY_URL` is only a fallback).
 - `PUBLIC_TINA_CLIENT_ID`, `TINA_TOKEN` — TinaCloud credentials, required for `pnpm build` everywhere
   (Netlify, Coolify Docker, local).
-- `PUBLIC_GA_ID` — optional GA4 measurement ID override (default `G-ZREVRSHYJB`).
 - `SIERRA_API_KEY` — Sierra lead-forwarding key for `/api/contact` (all platforms).
 - `CONTACT_ALLOWED_ORIGINS` — optional comma-separated extra origins allowed to submit the contact form,
   besides `SITE_URL`, the platform URL envs, and the hardcoded brand/localhost origins

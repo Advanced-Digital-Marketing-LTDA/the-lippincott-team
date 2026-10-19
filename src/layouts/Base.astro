@@ -17,22 +17,33 @@ interface Props {
 const { title, description, image } = Astro.props;
 const config = (await getConfig()).data?.config ?? null;
 
-// GA4 measurement ID, overridable per environment without a code change.
-// trim+|| so an explicitly blank PUBLIC_GA_ID falls back to the default.
-const gaId = import.meta.env.PUBLIC_GA_ID?.trim() || 'G-ZREVRSHYJB';
-
-// Send hits only from production builds, and on Netlify only from the
-// production context (deploy previews/branch deploys build with
-// NODE_ENV=production but get CONTEXT=deploy-preview/branch-deploy).
-// When CONTEXT is unset (local builds, non-Netlify hosts) PROD alone decides.
-const includeAnalytics =
+const includeGtm =
 	import.meta.env.PROD &&
 	(process.env.CONTEXT === undefined || process.env.CONTEXT === 'production');
+
 ---
 
 <!doctype html>
 <html lang="en">
 	<head>
+		{includeGtm && (
+			<>
+				<!-- Google Tag Manager -->
+				<script is:inline>
+					(function (w, d, s, l, i) {
+						w[l] = w[l] || [];
+						w[l].push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+						var f = d.getElementsByTagName(s)[0],
+							j = d.createElement(s),
+							dl = l != 'dataLayer' ? '&l=' + l : '';
+						j.async = true;
+						j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+						f.parentNode.insertBefore(j, f);
+					})(window, document, 'script', 'dataLayer', 'GTM-WM5FTV8R');
+				</script>
+				<!-- End Google Tag Manager -->
+			</>
+		)}
 		<BaseHead title={title} description={description} image={image?.trim() || config?.seo?.socialImage?.trim() || undefined} />
 		{/* Per-page head additions (e.g. the homepage's LCP poster preload). */}
 		<slot name="head" />
@@ -41,6 +52,14 @@ const includeAnalytics =
 		<noscript><style>.home-v2 .reveal{opacity:1;transform:none}</style></noscript>
 	</head>
 	<body>
+		{includeGtm && (
+			<>
+				<!-- Google Tag Manager (noscript) -->
+				<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WM5FTV8R"
+					height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+				<!-- End Google Tag Manager (noscript) -->
+			</>
+		)}
 		<TinaIsland name="global" wrapper={islands.global.wrapper}>
 			<Header config={config} />
 		</TinaIsland>
@@ -196,51 +215,6 @@ const includeAnalytics =
 				});
 			}
 		</script>
-		{/* Google Analytics (GA4) at the end of the body. The dataLayer queue
-		    starts immediately (so the initial page_view and ClientRouter re-fires
-		    are captured), but the gtag.js library itself is only injected on
-		    first engagement (pointerdown/keydown/scroll/touchstart) or after 6s
-		    idle — its bootstrap does forced-reflow layout queries (~150ms) that
-		    should never run before the page settles. */}
-		{
-			includeAnalytics && (
-				<script
-					is:inline
-					data-astro-rerun
-					set:html={`window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-gtag('config', ${JSON.stringify(gaId)});
-if (!window.__gaLoaderBound) {
-	window.__gaLoaderBound = true;
-	var __gaState = 0; // 0=idle, 1=loading, 2=loaded
-	var __loadGa = function () {
-		if (__gaState !== 0) return;
-		__gaState = 1;
-		var s = document.createElement('script');
-		s.async = true;
-		s.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(${JSON.stringify(gaId)});
-		s.onload = function () { __gaState = 2; };
-		s.onerror = function () {
-			// Transient failure: reset so a later ClientRouter rerun retries.
-			__gaState = 0;
-			s.remove();
-			window.__gaLoaderBound = false;
-		};
-		document.head.appendChild(s);
-	};
-	var __gaTimer = setTimeout(__loadGa, 6000);
-	var __onEngage = function () {
-		clearTimeout(__gaTimer);
-		__loadGa();
-	};
-	['pointerdown', 'keydown', 'scroll', 'touchstart'].forEach(function (e) {
-		window.addEventListener(e, __onEngage, { passive: true, once: true });
-	});
-}`}
-				/>
-			)
-		}
 	<script is:inline>
 		(function () {
 			if (window.__externalLinkPolicyBound) return;
