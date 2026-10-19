@@ -81,8 +81,6 @@ server.
      the right branch. Staging apps must keep its Build Variable flag on.
    - `SIERRA_API_KEY` — Sierra lead-forwarding key for the contact form;
      set it **runtime-only** (uncheck "Build Variable").
-   - `PUBLIC_GA_ID` (optional) — GA4 measurement ID override. Production
-     builds on Coolify include analytics (`CONTEXT` is unset there).
    - `BUILD_SCRIPT` (optional) — defaults to `build`; set `build:preview` for
      staging apps when the branch's Tina schema isn't indexed by TinaCloud
      yet (skips the cloud schema check, mirrors `netlify.toml` contexts).
