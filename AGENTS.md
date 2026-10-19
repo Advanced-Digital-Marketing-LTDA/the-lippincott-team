@@ -314,7 +314,7 @@ re-ignore the lockfile.
 `EXPOSE`. Required env: `PUBLIC_TINA_CLIENT_ID`, `TINA_TOKEN`, `SITE_URL`. The Dockerfile `HEALTHCHECK`
 (node fetch on `/`) is parsed by Coolify, takes precedence over UI checks, and gates Traefik routing +
 rolling updates. The container needs egress to TinaCloud (`content.tina.io` / `app.tina.io`) for content
-and visual editing; stateless, no volumes. The GTM container is embedded in the rendered site HTML.
+and visual editing; stateless, no volumes. The production GTM container is embedded in the rendered site HTML.
 
 **CDN (Bunny)**: `PUBLIC_CDN_MODE=full-site` (also absent/blank) retains the setup below.
 `media-only` serves the website directly from Coolify and resolves owned `/uploads/` through
@@ -373,9 +373,11 @@ every adapter) and additionally by `public/_redirects`, which Netlify's CDN read
 all other migrated WP URLs map 1:1 onto existing routes.
 
 Analytics: Google Tag Manager uses container `GTM-WM5FTV8R` in
-`src/layouts/Base.astro`. Its async script is first in `<head>` and its no-script
-iframe immediately follows `<body>`. Analytics tags are managed through GTM; no
-GA4/gtag.js tag is embedded directly in the site.
+`src/layouts/Base.astro`. The async script is first in `<head>` and the no-script
+iframe immediately follows `<body>`. Both load only when `import.meta.env.PROD` is
+true and `CONTEXT` is unset or `production`; Netlify previews and branch deploys
+are excluded. Analytics tags are managed through GTM; no GA4/gtag.js tag is
+embedded directly in the site.
 
 Environment variables (see `.env.example`). Shared rule for the secrets (`SIERRA_API_KEY`,
 `BUNNY_API_KEY`, `BUNNY_PULL_ZONE_ID`, `BUNNY_PURGE_SECRET`): never commit, never `PUBLIC_` prefix, and

@@ -43,7 +43,7 @@ or the depth of the community/school coverage.
 - Property search plus the Buyers/Sellers funnels run on the external
   Sierra/IDX platform at thelippincottteam.com; this site links into them.
 - Hosted on Netlify (static HTML + on-demand `/tina-island` editing
-  endpoint); Google Tag Manager is embedded in the shared page shell.
+  endpoint); Google Tag Manager is embedded in production HTML via the shared page shell.
 
 ## Capabilities and Constraints
 
