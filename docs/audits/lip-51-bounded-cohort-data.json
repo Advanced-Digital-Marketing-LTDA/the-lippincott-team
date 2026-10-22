@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "title": "LIP-51 bounded cohort evidence",
+    "capturedAt": "2026-10-06",
+    "property": "sc-domain:thelippincottteam.com",
+    "timezone": "America/Los_Angeles",
+    "sourceAudit": "October 6, 2026 Search Console audit incorporated in PR #86",
+    "crosswalkWorkbook": {
+      "name": "lippincott-url-family-cohort-crosswalk.xlsx",
+      "uploadedAt": "2026-10-08",
+      "sizeBytes": 40985,
+      "source": "LIP-51 attachment"
+    },
+    "sourceAuditWorkbook": {
+      "name": "lippincott-search-audit-inventory.xlsx",
+      "extractedAt": "2026-10-06",
+      "sizeBytes": 75070,
+      "libraryFileId": "libfile_1112ffea8a408191898dca3f906bf711",
+      "tabs": ["GSC Baseline", "GSC Opportunities"],
+      "access": "Full text extracted through Library read; local binary materialization did not complete (signed transfer returned HTTP 403)."
+    },
+    "notes": [
+      "Reported URL rows are returned Search Console rows, not unique or indexed URL counts and not an inventory.",
+      "Page-family and property-level metrics are separate source scopes and are not reconciled by subtracting one from the other.",
+      "Property-level totals and the accepted 90-day page-family aggregates are separate inputs. Page-family impressions and page-family CTR are not provided.",
+      "The October 6 GSC Opportunities tab contains selected URL-level metrics, but its opportunity set is not a full family census. Those rows were not added to or summed into the family aggregates.",
+      "Missing daily rows are not zero-valued observations. The first resumed row is not release or recrawl proof.",
+      "The October 8 crosswalk workbook metadata is verified, but its workbook text was unreadable and signed-URL materialization returned HTTP 403 in this environment. The accepted page-family metrics are preserved from LIP-51 tracker comment 5155 and the bounded-sample decision in comment 12328; no unobserved crosswalk rows were transcribed."
+    ]
+  },
+  "windows": {
+    "prior90": { "from": "2026-04-08", "through": "2026-07-06", "days": 90 },
+    "current90": { "from": "2026-07-07", "through": "2026-10-04", "days": 90 },
+    "prior28": { "from": "2026-08-10", "through": "2026-09-06", "days": 28 },
+    "current28": { "from": "2026-09-07", "through": "2026-10-04", "days": 28 }
+  },
+  "dailyCoverage": {
+    "prior90": { "returnedDays": 86, "windowDays": 90 },
+    "current90": { "returnedDays": 41, "windowDays": 90 },
+    "prior28": { "returnedDays": 13, "windowDays": 28 },
+    "current28": { "returnedDays": 28, "windowDays": 28 },
+    "noRowsReturned": { "from": "2026-07-03", "through": "2026-08-24" },
+    "firstResumedRow": "2026-08-25",
+    "settledCutoff": "2026-10-04",
+    "nextDayIncomplete": "2026-10-05"
+  },
+  "propertyTotals": {
+    "prior90": { "clicks": 1220, "impressions": 164937, "sourceCtrDecimal": 0.007396763612773363, "averagePosition": 12.200046078199556 },
+    "current90": { "clicks": 118, "impressions": 10282, "sourceCtrDecimal": 0.01147636646566816, "averagePosition": 13.909258899046877 },
+    "prior28": { "clicks": 35, "impressions": 3242, "sourceCtrDecimal": 0.0107958050586058, "averagePosition": 14.159777914867366 },
+    "current28": { "clicks": 83, "impressions": 7040, "sourceCtrDecimal": 0.011789772727272727, "averagePosition": 13.793892045454545 }
+  },
+  "pageFamilyMetrics": {
+    "prior90": [
+      { "id": "property-search", "label": "/property-search/ (IDX)", "urlRows": 23110, "clicks": 840 },
+      { "id": "blog", "label": "/blog/", "urlRows": 22, "clicks": 98 },
+      { "id": "homepage-variants", "label": "Homepage variants", "urlRows": 2, "clicks": 201 },
+      { "id": "agents", "label": "/agents/", "urlRows": 15, "clicks": 50 },
+      { "id": "about", "label": "/about/", "urlRows": 1, "clicks": 12 }
+    ],
+    "current90": [
+      { "id": "property-search", "label": "/property-search/ (IDX)", "urlRows": 1186, "clicks": 23 },
+      { "id": "blog", "label": "/blog/", "urlRows": 34, "clicks": 9 },
+      { "id": "homepage-variants", "label": "Homepage variants", "urlRows": 2, "clicks": 63 },
+      { "id": "agents", "label": "/agents/", "urlRows": 2, "clicks": 0 },
+      { "id": "about", "label": "/about/", "urlRows": 17, "clicks": 17 }
+    ],
+    "familyImpressions": { "state": "not_provided" }
+  },
+  "otherPropertyScopes": {
+    "separateDomainProperty": "sc-domain:lippincottteam.com",
+    "separateDomainMetrics": {
+      "prior90": { "clicks": 131, "impressions": 22347, "sourceCtrDecimal": 0.0058620843961158095, "averagePosition": 22.89685416386987, "returnedDays": 69, "windowDays": 90 },
+      "current90": { "clicks": 260, "impressions": 23753, "sourceCtrDecimal": 0.010945985770218498, "averagePosition": 17.890161242790384, "returnedDays": 90, "windowDays": 90 },
+      "prior28": { "clicks": 97, "impressions": 7048, "sourceCtrDecimal": 0.0137627695800227, "averagePosition": 17.959704880817252, "returnedDays": 28, "windowDays": 28 },
+      "current28": { "clicks": 20, "impressions": 2674, "sourceCtrDecimal": 0.0074794315632011965, "averagePosition": 3.945400149588631, "returnedDays": 28, "windowDays": 28 }
+    },
+    "overlappingUrlPrefixProperty": "excluded from the reported property totals; do not add overlapping URL prefixes"
+  },
+  "queryMetrics": {
+    "state": "not_included",
+    "disclosure": "No query-level values are included in this bounded comparison. Do not infer query-level movement or disclose query details from these page/property aggregates."
+  },
+  "routeProbeSample": {
+    "observedAt": "2026-10-06",
+    "count": 17,
+    "scope": "The exact 17 dated route probes documented in the merged PR #86 crosswalk; not an exhaustive historical URL map or production recrawl."
+  },
+  "postReleaseComparison": {
+    "status": "deferred",
+    "releaseAnchorIssue": "LIP-189",
+    "releaseAnchorVerified": false,
+    "requiredWindows": [28, 56],
+    "reason": "Do not start a post-release comparison until the LIP-189 release and recrawl anchor is verified."
+  },
+  "cancelledFollowOn": {
+    "issue": "LIP-185",
+    "status": "canceled",
+    "canceledAt": "2026-10-14",
+    "archivedAt": "2026-10-21",
+    "handling": "Complete bounded validation within LIP-51; do not reactivate the canceled issue or revive the exhaustive-map requirement."
+  }
+}
