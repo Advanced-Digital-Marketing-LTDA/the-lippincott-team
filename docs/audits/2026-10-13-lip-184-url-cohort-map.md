@@ -1,25 +1,42 @@
-# LIP-184 URL-family cohort map
+# LIP-184 URL-family cohort map: bounded evidence for LIP-51
 
-**Evidence cut:** 2026-10-13, repository `main` at `2ad0c746e38dc6f6aef32419b4a29a25d279c651` (PR #85 merged).
-**Purpose:** Separate URL populations for LIP-51 and its follow-on reconciliation. This is a route-family map, not a performance analysis or a claim about why rankings changed.
+**Source evidence:** October 6, 2026 Search Console audit and 17 route probes; bounded cohort workbook attached October 8.
+**Repository baseline:** `origin/main` at `eae890981a925fadfba84e54c89071c5ca9d6379`, fetched October 22, 2026 (PR #86 is merged).
+**Purpose:** Define and compare the bounded URL-family sample for LIP-51. This is not a complete inventory, production recrawl, performance-causality analysis, or claim about why rankings changed.
 
 ## Page-level GSC cohorts
 
-The October 6 audit reports these URL-family aggregates for `sc-domain:thelippincottteam.com`. The prior window is April 8 to July 6, 2026; the recent window is July 7 to October 4, 2026. “URL rows” count returned URLs, including variants. They are not unique-page, indexed-page, or property counts.
+The October 8 crosswalk's `Cohort Summary` reports returned page URL rows grouped by path for `sc-domain:thelippincottteam.com`. “URL rows” include protocol, host, path, query, and fragment variants; they are not unique or indexed page counts, property totals, or active listing counts. CTR values below are source fractions displayed as percentages rounded to four decimal places; the exact decimal fractions remain in `docs/audits/lip-51-bounded-cohort-data.json`.
 
-| Page family | Prior 90-day URL rows / page clicks | Recent 90-day URL rows / page clicks | Cohort treatment |
-| --- | ---: | ---: | --- |
-| `/property-search/` / IDX | 23,110 / 840 | 1,186 / 23 | Keep as its own listing-inventory cohort. Do not fold into editorial or retained-page totals. |
-| Blog | 22 / 98 | 34 / 9 | Editorial cohort. These are URL-row counts, not an article count or proof that every row has a one-to-one historic destination. |
-| Homepage variants | 2 / 201 | 2 / 63 | Keep host/path variants separate until the row-level comparison says which paths overlap. |
-| Historic `/agents/` | 15 / 50 | 2 / 0 | Historic-profile cohort. Map a person to `/about/` only with an exact source record; the Amy mapping does not resolve all agents. |
-| `/about/` | 1 / 12 | 17 / 17 | Current profile/about cohort. Keep separate from historic `/agents/` until each person's mapping is verified. |
+| Page family | Prior 90 days: rows / clicks / impressions / CTR | Current 90 days: rows / clicks / impressions / CTR |
+| --- | --- | --- |
+| Property-search / IDX | 23,110 / 840 / 112,742 / 0.7451% | 1,186 / 23 / 2,704 / 0.8506% |
+| Editorial blog | 22 / 98 / 18,234 / 0.5375% | 34 / 9 / 2,991 / 0.3009% |
+| Homepage variants | 2 / 201 / 16,393 / 1.2261% | 2 / 63 / 1,974 / 3.1915% |
+| Legacy `/agents/` profiles | 15 / 50 / 6,298 / 0.7939% | 2 / 0 / 3 / 0% |
+| `/about/` and moved profiles | 1 / 12 / 4,017 / 0.2987% | 17 / 17 / 1,090 / 1.5596% |
+| Other page URLs | 230 / 21 / 23,586 / 0.0890% | 34 / 8 / 4,347 / 0.1840% |
 
-These are page-level figures, not Search Console property totals. The audit reports prior-90-day property totals of 1,220 clicks / 164,937 impressions and recent-90-day totals of 118 / 10,282; the corresponding page rows sum differently. Search Console returned 86 daily rows in the prior window and 41 in the recent one. It returned no THE rows from July 3 through August 24. The first later row is not a launch date. The report also identifies a separate `sc-domain:lippincottteam.com` property and an overlapping URL-prefix property that it excluded from totals. Keep those property scopes separate.
+| Page family | Previous 28 days: rows / clicks / impressions / CTR | Current 28 days: rows / clicks / impressions / CTR |
+| --- | --- | --- |
+| Property-search / IDX | 761 / 11 / 1,575 / 0.6984% | 612 / 12 / 1,129 / 1.0629% |
+| Editorial blog | 12 / 1 / 319 / 0.3135% | 34 / 8 / 2,672 / 0.2994% |
+| Homepage variants | 1 / 19 / 620 / 3.0645% | 2 / 44 / 1,354 / 3.2496% |
+| Legacy `/agents/` profiles | 0 / absent / absent / absent | 2 / 0 / 3 / 0% |
+| `/about/` and moved profiles | 15 / 3 / 237 / 1.2658% | 17 / 14 / 853 / 1.6413% |
+| Other page URLs | 33 / 1 / 1,343 / 0.0745% | 29 / 7 / 3,004 / 0.2330% |
+
+The crosswalk's page URL row counts sum to 23,380, 1,275, 822, and 696 for prior-90, current-90, previous-28, and current-28, respectively. `cohortDefinitions` in the JSON evidence file preserves the source-stated path rules, labels, URL-variant handling, and residual `Other` groups. Raw URL rows and a deterministic row-level precedence/classifier are not copied, so the aggregate membership cannot be regenerated URL by URL from this file. The `/property-search/` detail, search-form, search-results, and other subcohorts sum exactly to the parent family's rows, clicks, and impressions in each window. Rows with no returned page data remain absent, not zero; for example, prior-28 `/agents/` is 0 rows with blank metrics, while current-90 `/agents/` has 2 returned rows, zero clicks, and 3 impressions.
+
+These are page-level figures, not Search Console property totals. Their summed metrics are an arithmetic check only; do not reconcile them against the separate property totals. The THE property reports prior/current 90-day totals of 1,220/118 clicks and 164,937/10,282 impressions, and previous/current 28-day totals of 35/83 clicks and 3,242/7,040 impressions. The old-domain property remains separate. The workbook reports 253 selected query rows from a 736-row current THE page-query extraction; query classes describe disclosed rows only, and undisclosed clicks are not assigned to nonbrand.
+
+The source crosswalk extraction was transferred from the parent thread after its authorized Library read; this executor did not read the crosswalk binary directly. Its Library ID, version, and supplied SHA-256 are recorded in the JSON. The October 6 audit workbook was read through Library text extraction; its `GSC Baseline` property totals and selected `GSC Opportunities` URL metrics were checked, but those selected URLs are not summed as a family census. The retained aggregate rows, windows, and CTR fractions are recalculated by `node scripts/lip-51-cohort-comparison.mjs`.
 
 ## Sampled historical route register
 
-The companion workbook’s `Migration Routes` tab records 17 live probes on October 6, 2026. It supplies the full request URL, status, redirect count, final URL, response chain, destination canonical, capture time, action ID, and proposed disposition. These are exact sampled routes, not an exhaustive former-site export.
+The October 6 audit workbook’s `Migration Routes` tab records 17 live probes. The October 8 `lippincott-url-family-cohort-crosswalk.xlsx` is the bounded cohort crosswalk attached to LIP-51. The 17 probes supply the full request URL, status, redirect count, final URL, response chain, destination canonical, capture time, action ID, and proposed disposition. They are a bounded sample, not an exhaustive former-site export or a current production recrawl.
+
+The crosswalk summary, IDX subcohorts, definitions, and route evidence were transferred from the parent thread after an authorized Library read; the binary itself was not available directly in this executor, and a signed-URL materialization attempt returned HTTP 403. The values needed for this bounded comparison are recorded in the JSON evidence file; raw selected URL and query rows are not replicated there. This binary-transfer limitation does not undo the supplied source extraction and is not a request for an exhaustive map.
 
 | Record | Historical request URL | Observed result on October 6, 2026 | Cohort mapping |
 | --- | --- | --- | --- |
@@ -57,18 +74,19 @@ The first ten rows show the tested `lippincottteam.com` paths preserving their p
 | Legacy IDX search-form | `/property-search/search-form/` | Unresolved legacy-search cohort. No redirect is approved until the equivalent general-search destination and legacy filter/query contract are confirmed; the featured-only AI search is not assumed equivalent. | Both historical URL recovery audit notes and PR #85 disposition. This route is not a property detail and must not be grouped with either sold listing. |
 | Other disposition exceptions | `/sellers/home-sale-calculator/`; short Tomball cost-of-living path | Keep separate under LIP-58 and LIP-103. MIG-013 records two redirects from the seller route to `/sell/` in the October 6 probe; MIG-014 proves the long article path worked after a temporary host redirect. | The short Tomball route remains untested. A working status alone does not establish intent equivalence for the calculator route. |
 
-## Partition rules for LIP-51 / LIP-185
+## LIP-51 cohort comparison and partition rules
 
 1. Preserve the literal source URL, host, path, query, source-record ID, observed date, destination (if any), disposition, and verification state as separate columns in the eventual row-level crosswalk.
 2. Use the cohort labels above; do not merge editorial pages, people/contact pages, IDX search forms, individual property details, or host variants. Treat a source URL and its mapped destination as one relationship, not one summed property.
 3. Mark a row `unverified` when the cited record supplies a family but not the exact historical URL, live status, or per-URL destination. Do not fill those fields from today's route shape.
-4. Keep settled GSC dates, page totals, property totals, query disclosure limits, and `absent` versus zero values in their source units. LIP-50 records no returned rows from 2026-07-03 through 2026-08-24; the first later row is not a launch date. No rank-loss cause is assigned here.
-5. Do not calculate cohort performance from this map. LIP-185 owns page/property reconciliation and window/CTR/disclosure controls after this mapping is reviewed.
+4. Keep settled GSC dates, page-family totals, property totals, query disclosure limits, percent-versus-decimal CTR, and `absent` versus zero values in their source units. LIP-50 records no returned THE daily rows from 2026-07-03 through 2026-08-24; the first later row, August 25, is not a release or recrawl date. October 5 is incomplete; the settled cutoff is October 4. No rank-loss cause is assigned here.
+5. Reproduce the bounded aggregate comparison with `node scripts/lip-51-cohort-comparison.mjs`; its aggregate source rows and source-stated cohort definitions are in `docs/audits/lip-51-bounded-cohort-data.json`. The script validates all four inclusive 90-day and 28-day windows, checks each property and page-family CTR fraction against clicks divided by impressions, and presents decimal and percentage forms. It also verifies family row totals and the four `/property-search/` subcohort partitions. It keeps THE, the old-domain property, page-level cohorts, and property totals as separate measures. Family rows count returned Search Console URL rows, not inventory or unique pages. Raw URLs and a deterministic row-level precedence/classifier are not retained, so the JSON supports aggregate arithmetic checks but not URL-by-URL cohort reassignment. The 28-day values are historical baselines; the prior 28-day window returned only 13/28 THE property days and is not a complete post-release comparison. Raw differences are descriptive only; incomplete daily coverage does not establish a cause.
+6. Keep `sc-domain:lippincottteam.com` separate from `sc-domain:thelippincottteam.com`; do not add the overlapping URL-prefix property. The workbook's 253 disclosed query rows are a subset of a 736-row current THE page-query extraction. Brand-like, strict-brand, and nonbrand classifications apply only to those disclosed rows; undisclosed clicks are not assigned to nonbrand. Query values are not reproduced here, and no query-level movement is inferred.
 
 ## Coverage boundary and next evidence needed
 
-The cited Library sources are now available and reviewed: `lippincott-search-growth-audit.pdf` (pages 4 to 6, 10 to 13, and 27) and `lippincott-search-audit-inventory.xlsx` (`URL Inventory`, `Migration Routes`, and GSC tabs), both dated October 6, 2026. The 70-row URL Inventory tab covers the current sitemap and raw HTML checks. It does not cover the complete former 23,000-plus IDX inventory. The 17 route probes and their outcomes appear above; they provide targeted examples, not a complete historical crawl.
+The bounded source set comprises `lippincott-search-growth-audit.pdf` (pages 4 to 6, 10 to 13, and 27), `lippincott-search-audit-inventory.xlsx` (`URL Inventory`, `Migration Routes`, and GSC tabs) dated October 6, and the LIP-51 crosswalk workbook `lippincott-url-family-cohort-crosswalk.xlsx` uploaded October 8. The 70-row URL Inventory tab covers the current sitemap and raw HTML checks. Neither that tab nor the 17 route probes is a complete former-site or IDX inventory; a full historical inventory is outside LIP-51's bounded scope. The exact 17 route records, page-family summary rows, IDX subcohort rows, and disclosure limits are retained in the bounded evidence; unknown URLs remain unclassified.
 
-To extend the row-level crosswalk beyond the 17 probes, obtain an authorized historical IDX URL/listing export with source URL, tested date, response/redirect chain, destination, identity/MLS key, rights/disposition decision, and source for each fact. The audit also lacks an owner-provided dated domain/platform/IDX change log around July 3 and August 25. Keep unlisted routes and that timeline unverified; the GSC family totals do not supply the missing listing identities or explain ranking changes.
+The October 14 clarification removed the requirement for an exhaustive former URL map. Do not block LIP-51 on a 23,000-plus URL reconstruction. Keep unknown or unobserved routes unclassified. The audit lacks an owner-provided dated domain/platform/IDX change log around July 3 and August 25; the GSC family totals do not supply missing listing identities, establish a release date, or explain ranking changes.
 
-LIP-184 blocks LIP-51; LIP-185 is the next dated checkpoint and also blocks LIP-51. The LIP-21 register and live probe are incorporated only as existing evidence. PR #85 is merged; its documented DNS limitation means live acceptance remains separate from this local mapping.
+This branch makes the bounded source comparison reproducible, states its coverage and disclosure limits, and leaves unobserved URLs unclassified. The prior/current 28-day windows are recorded in `docs/audits/lip-51-bounded-cohort-data.json`; a post-release 28/56-day comparison is deferred until LIP-189's release and recrawl anchor is verified. LIP-185 was canceled October 14 and archived October 21; its substantive totals/windows/CTR/disclosure validation is handled within LIP-51 and it is not reactivated. LIP-51 remains In Progress until its outstanding release/recrawl evidence is available. The LIP-21 register and October 6 live probe are incorporated only as existing evidence. PR #85's documented DNS limitation means historical probe results do not establish current production status.
