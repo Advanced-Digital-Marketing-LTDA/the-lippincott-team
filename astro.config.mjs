@@ -17,10 +17,10 @@ import tailwindcss from '@tailwindcss/vite';
 // Fail before adapter/content compilation when a build is misconfigured.
 parseCdnConfig(process.env);
 
-// Host-neutral: every content page prerenders to static HTML, and the one
-// on-demand route (/tina-island, the visual-editing endpoint) is served by
-// whichever host built the site. Each platform sets its own build env var
-// automatically — nothing to configure — and any other host (including a
+// Host-neutral: content pages prerender to static HTML; on-demand routes
+// (visual editing, API handlers, and query-preserving legacy redirects) are
+// served by whichever host built the site. Each platform sets its own build env
+// var automatically — nothing to configure — and any other host (including a
 // local `wrangler deploy`) falls back to a portable Node server. Set
 // DEPLOY_ADAPTER to force a specific adapter when no env var applies.
 async function getAdapter() {
