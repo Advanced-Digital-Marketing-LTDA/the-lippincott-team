@@ -3,6 +3,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { chromium } from 'playwright';
+import { legacyRedirects } from '../../src/lib/legacy-redirect-data.mjs';
 
 const base = process.env.LEGACY_REDIRECTS_BASE || 'http://127.0.0.1:4321';
 const redirects = [
@@ -22,7 +23,7 @@ for (const [source, destination] of redirects) {
 				assert.equal(target.status, 200, 'Destination must not redirect again or return a soft 404');
 				if (method === 'GET') {
 					const html = await target.text();
-					assert.match(html, /<h1[\s>]/);
+					assert.match(html, /<h1[\s>]/, destination);
 					assert.ok(html.includes(`<link rel="canonical" href="https://thelippincottteam.com${destination}"`));
 				}
 			}
@@ -46,6 +47,35 @@ for (const [source, destination] of redirects) {
 			assert.equal(originalRequest.redirectedFrom(), null, 'No redirect chain');
 		} finally {
 			await browser.close();
+		}
+	});
+}
+
+
+
+// On-demand 301 behavior is served by the shared handler and mirrored in public/_redirects.
+// Audit each selected destination against the production build for a live, canonical page.
+for (const [source, destination] of legacyRedirects) {
+	test(`${source} emits one HTTP 301, preserves queries, and reaches its destination`, async () => {
+		const query = '?utm_source=Google%20Search&tag=a&tag=b&empty=&next=https%3A%2F%2Fexample.org%2F';
+		const isImage = source.endsWith('.jpg');
+		for (const method of ['GET', 'HEAD']) {
+			const response = await fetch(new URL(source + query, base), { method, redirect: 'manual' });
+			assert.equal(response.status, 301, `${method} ${source}`);
+			assert.equal(response.headers.get('location'), destination + query);
+
+			const target = await fetch(new URL(destination + query, base), { method, redirect: 'manual' });
+			assert.equal(target.status, 200, destination);
+			assert.equal(target.headers.get('location'), null, destination);
+			if (method === 'GET') {
+				if (isImage) {
+					assert.match(target.headers.get('content-type') || '', /^image\/jpeg\b/i);
+				} else {
+					const html = await target.text();
+					assert.match(html, /<h1[\s>]/, destination);
+					assert.ok(html.includes(`<link rel="canonical" href="https://thelippincottteam.com${destination}"`), destination);
+				}
+			}
 		}
 	});
 }
