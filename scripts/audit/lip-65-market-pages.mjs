@@ -21,23 +21,72 @@ const viewports = [
 	{ name: 'mobile', width: 375, height: 812 },
 ];
 
+function optionValue(argv, name) {
+	const position = argv.indexOf(name);
+	return position < 0 ? undefined : argv[position + 1];
+}
+
 function parseArgs(argv) {
-	const args = { base: null, canonicalOrigin: null };
-	for (let i = 2; i < argv.length; i++) {
-		if (argv[i] === '--base') args.base = argv[++i];
-		else if (argv[i] === '--canonical-origin') args.canonicalOrigin = argv[++i];
-	}
-	if (!args.base) {
-		throw new Error('Usage: node scripts/audit/lip-65-market-pages.mjs --base <local-preview-url> [--canonical-origin <site-origin>]');
-	}
-	const base = new URL(args.base);
-	if (!['http:', 'https:'].includes(base.protocol)) throw new Error('Preview URL must use HTTP or HTTPS');
-	const canonicalOrigin = new URL(args.canonicalOrigin ?? base.origin);
-	if (!['http:', 'https:'].includes(canonicalOrigin.protocol)) throw new Error('Canonical origin must use HTTP or HTTPS');
+	const usage = 'Usage: node scripts/audit/lip-65-market-pages.mjs --base <local-preview-url> [--canonical-origin <site-origin>]';
+	const baseValue = optionValue(argv, '--base');
+	assert.ok(baseValue, usage);
+	const base = new URL(baseValue);
+	assert.ok(['http:', 'https:'].includes(base.protocol), 'Preview URL must use HTTP or HTTPS');
+	const canonicalOrigin = new URL(optionValue(argv, '--canonical-origin') ?? base.origin);
+	assert.ok(['http:', 'https:'].includes(canonicalOrigin.protocol), 'Canonical origin must use HTTP or HTTPS');
 	return { base: base.toString(), canonicalOrigin: canonicalOrigin.origin };
 }
 
-async function inspectPage(page, base, canonicalOrigin, route, viewport) {
+async function readTable(page, selector) {
+	return page.locator(selector).evaluate((node) => ({
+		caption: node.querySelector('caption')?.textContent?.trim(),
+		columnHeaders: [...node.querySelectorAll('thead th')].map((header) => ({
+			text: header.textContent?.trim(),
+			scope: header.getAttribute('scope'),
+		})),
+		rowHeaders: [...node.querySelectorAll('tbody th')].map((header) => header.getAttribute('scope')),
+	}));
+}
+
+async function assertAccessibleTable(page, selector, expectedColumnCount, expectedHeaders) {
+	const table = await readTable(page, selector);
+	assert.ok(table.caption, `${selector} should have a caption`);
+	assert.equal(table.columnHeaders.length, expectedColumnCount, `${selector} should retain ${expectedColumnCount} columns`);
+	assert.ok(table.columnHeaders.every(({ scope }) => scope === 'col'), `${selector} column headers should identify their columns`);
+	assert.equal(table.rowHeaders.length, 6, `${selector} should retain six city row headers`);
+	assert.ok(table.rowHeaders.every((scope) => scope === 'row'), `${selector} row headers should identify their rows`);
+	if (expectedHeaders) assert.deepEqual(table.columnHeaders, expectedHeaders);
+}
+
+async function assertRegionalComparison(page) {
+	await assertAccessibleTable(page, '.regional-market-comparison table', 3, [
+		{ text: 'Area', scope: 'col' },
+		{ text: 'Active listing median', scope: 'col' },
+		{ text: 'Median listing age', scope: 'col' },
+	]);
+}
+
+async function assertCommunityComparison(page) {
+	await assertAccessibleTable(page, '#communities table', 5);
+}
+
+const tableAssertions = new Map([
+	['/', assertRegionalComparison],
+	['/buy/', assertRegionalComparison],
+	['/sell/', assertRegionalComparison],
+	['/northwest-houston-real-estate/', assertCommunityComparison],
+]);
+
+function assertPageBasics(result, route, canonicalOrigin, viewport) {
+	assert.equal(result.canonical.length, 1, `${route} should emit exactly one canonical link`);
+	assert.equal(result.canonical[0], new URL(route, canonicalOrigin).toString(), `${route} should retain its canonical path`);
+	assert.equal(result.mainCount, 1, `${route} should expose one main landmark`);
+	assert.equal(result.h1Count, 1, `${route} should expose one page heading`);
+	assert.deepEqual(result.missingAlt, [], `${route} should give each image an alt attribute`);
+	assert.ok(result.documentWidth <= result.viewportWidth + 1, `${route} should not overflow horizontally at ${viewport.name}`);
+}
+
+async function inspectPage(page, { base, canonicalOrigin, route, viewport }) {
 	const response = await page.goto(new URL(route, base).toString(), { waitUntil: 'load', timeout: 45_000 });
 	assert.equal(response?.status(), 200, `${route} should return HTTP 200 at ${viewport.name}`);
 	await page.locator('main').waitFor({ state: 'visible', timeout: 10_000 });
@@ -52,47 +101,8 @@ async function inspectPage(page, base, canonicalOrigin, route, viewport) {
 		return { canonical, mainCount, h1Count, missingAlt, viewportWidth, documentWidth };
 	});
 
-	assert.equal(result.canonical.length, 1, `${route} should emit exactly one canonical link`);
-	assert.equal(result.canonical[0], new URL(route, canonicalOrigin).toString(), `${route} should retain its canonical path`);
-	assert.equal(result.mainCount, 1, `${route} should expose one main landmark`);
-	assert.equal(result.h1Count, 1, `${route} should expose one page heading`);
-	assert.deepEqual(result.missingAlt, [], `${route} should give each image an alt attribute`);
-	assert.ok(result.documentWidth <= result.viewportWidth + 1, `${route} should not overflow horizontally at ${viewport.name}`);
-
-	if (['/', '/buy/', '/sell/'].includes(route)) {
-		const table = await page.locator('.regional-market-comparison table').evaluate((node) => ({
-			caption: node.querySelector('caption')?.textContent?.trim(),
-			columnHeaders: [...node.querySelectorAll('thead th')].map((header) => ({
-				text: header.textContent?.trim(),
-				scope: header.getAttribute('scope'),
-			})),
-			rowHeaders: [...node.querySelectorAll('tbody th')].map((header) => header.getAttribute('scope')),
-		}));
-		assert.ok(table.caption, 'regional comparison table should have a caption');
-		assert.deepEqual(table.columnHeaders, [
-			{ text: 'Area', scope: 'col' },
-			{ text: 'Active listing median', scope: 'col' },
-			{ text: 'Median listing age', scope: 'col' },
-		]);
-		assert.equal(table.rowHeaders.length, 6, 'regional comparison should retain six city row headers');
-		assert.ok(table.rowHeaders.every((scope) => scope === 'row'), 'each city row header should identify its row');
-	}
-
-	if (route === '/northwest-houston-real-estate/') {
-		const table = await page.locator('#communities table').evaluate((node) => ({
-			caption: node.querySelector('caption')?.textContent?.trim(),
-			columnHeaders: [...node.querySelectorAll('thead th')].map((header) => ({
-				text: header.textContent?.trim(),
-				scope: header.getAttribute('scope'),
-			})),
-			rowHeaders: [...node.querySelectorAll('tbody th')].map((header) => header.getAttribute('scope')),
-		}));
-		assert.ok(table.caption, 'Northwest Houston community table should have a caption');
-		assert.equal(table.columnHeaders.length, 5, 'Northwest Houston community table should retain five columns');
-		assert.ok(table.columnHeaders.every(({ scope }) => scope === 'col'), 'each community column header should identify its column');
-		assert.equal(table.rowHeaders.length, 6, 'Northwest Houston community table should retain six city row headers');
-		assert.ok(table.rowHeaders.every((scope) => scope === 'row'), 'each community row header should identify its row');
-	}
+	assertPageBasics(result, route, canonicalOrigin, viewport);
+	await tableAssertions.get(route)?.(page);
 
 	console.log(`PASS ${viewport.name} ${route}: canonical, landmarks, headings, image alt, and width`);
 }
@@ -108,7 +118,7 @@ async function main() {
 			const page = await browser.newPage({ viewport: { width: viewport.width, height: viewport.height } });
 			// The audit only needs the built pages; skip the production GTM request.
 			await page.route('https://www.googletagmanager.com/**', (route) => route.abort());
-			for (const route of routes) await inspectPage(page, base, canonicalOrigin, route, viewport);
+			for (const route of routes) await inspectPage(page, { base, canonicalOrigin, route, viewport });
 			await page.close();
 		}
 	} finally {
