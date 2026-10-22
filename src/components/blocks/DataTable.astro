@@ -11,6 +11,9 @@ interface Props { data: Omit<DataTableBlock, '__typename'> }
 const { data } = Astro.props;
 const headers = data.headers ?? [];
 const rows = (data.rows ?? []).filter(r => r !== null);
+const tableCaption = data.title?.replaceAll('**', '').replace(/[*_`]/g, '').trim()
+	|| headers.map(header => header?.heading?.trim()).filter(Boolean).join('; ')
+	|| 'Data table';
 // Numeric-looking cells get the big light figure treatment; text cells stay body copy.
 const isNumeric = (text?: string | null) => !!text && /^[\d#$%.,+\-–—×x ]+$/.test(text.trim());
 // Normalize editor input: trim, strip a leading '#', omit when empty.
@@ -35,11 +38,12 @@ const anchorId = data.anchorId?.trim().replace(/^#/, '') || undefined;
 		{rows.length > 0 && (
 			<div class="overflow-x-auto">
 				<table class="w-full border-collapse">
+					<caption class="sr-only">{tableCaption}</caption>
 					{headers.length > 0 && (
 						<thead>
 							<tr>
 								{headers.map((h) => (
-									<th data-tina-field={h ? tinaField(h) : undefined} class="pb-3.5 pr-5 text-left text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground last:pr-0">{h?.heading}</th>
+									<th scope="col" data-tina-field={h ? tinaField(h) : undefined} class="pb-3.5 pr-5 text-left text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground last:pr-0">{h?.heading}</th>
 								))}
 							</tr>
 						</thead>
@@ -48,17 +52,20 @@ const anchorId = data.anchorId?.trim().replace(/^#/, '') || undefined;
 						{rows.map((row, rowIndex) => {
 							const cells = row.cells ?? [];
 							return (
-								<tr data-tina-field={tinaField(row)} class={rowIndex === rows.length - 1 ? '[&>td]:border-b' : ''}>
-									{cells.map((cell, cellIndex) => (
-										<td
-											data-tina-field={cell ? tinaField(cell) : undefined}
-											class={`border-t border-hairline py-4 pr-5 align-baseline leading-relaxed last:pr-0 ${cellIndex === 0
-												? 'text-[15px] font-semibold text-ink'
-												: isNumeric(cell?.text)
-													? 'whitespace-nowrap text-lg font-serif font-light tracking-[-0.01em] text-ink'
-													: 'text-[15px] text-body'}`}
-										>{cell?.text}</td>
-									))}
+								<tr data-tina-field={tinaField(row)} class={rowIndex === rows.length - 1 ? '[&>td]:border-b [&>th]:border-b' : ''}>
+									{cells.map((cell, cellIndex) => {
+										const isRowHeader = cellIndex === 0 && !!cell?.text?.trim();
+										const cellClass = `border-t border-hairline py-4 pr-5 align-baseline leading-relaxed last:pr-0 ${cellIndex === 0
+											? 'text-[15px] font-semibold text-ink'
+											: isNumeric(cell?.text)
+												? 'whitespace-nowrap text-lg font-serif font-light tracking-[-0.01em] text-ink'
+												: 'text-[15px] text-body'}`;
+										return isRowHeader ? (
+											<th scope="row" data-tina-field={tinaField(cell)} class={`${cellClass} text-left`}>{cell?.text}</th>
+										) : (
+											<td data-tina-field={cell ? tinaField(cell) : undefined} class={cellClass}>{cell?.text}</td>
+										);
+									})}
 								</tr>
 							);
 						})}

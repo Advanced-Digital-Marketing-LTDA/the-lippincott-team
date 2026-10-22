@@ -14,15 +14,17 @@ const comparison = blocks.find(
 		block.__typename === 'PageBlocksDataTable' && normalizedAnchor(block.anchorId) === 'communities',
 );
 
+const medianHeader = comparison?.headers?.[1]?.heading?.trim().toLowerCase();
+const daysHeader = comparison?.headers?.[3]?.heading?.trim().toLowerCase();
 const hasExpectedColumns =
-	comparison?.headers?.[1]?.heading?.trim().toLowerCase() === 'median list' &&
-	comparison?.headers?.[3]?.heading?.trim().toLowerCase() === 'days on market';
+	['median list', 'active listing median'].includes(medianHeader ?? '') &&
+	['days on market', 'median listing age'].includes(daysHeader ?? '');
 const sourceSummary = richTextToPlainText(comparison?.summary);
 let validationError: string | undefined;
 if (!comparison) {
 	validationError = 'Regional market comparison requires the Northwest Houston #communities data table.';
 } else if (!hasExpectedColumns) {
-	validationError = 'Regional market comparison requires Median list and Days on market in columns 2 and 4.';
+	validationError = 'Regional market comparison requires its active-listing median and listing-age columns in positions 2 and 4.';
 } else if (!sourceSummary) {
 	validationError = 'Regional market comparison requires a source summary with the reporting period and property scope.';
 }
@@ -69,8 +71,8 @@ const linkHref = mediaUrl(safeHref(labels?.link), mediaSite) ?? '/northwest-hous
 		<thead>
 			<tr>
 				<th scope="col">{labels?.areaLabel ?? 'Area'}</th>
-				<th scope="col">{labels?.medianLabel ?? 'Median list'}</th>
-				<th scope="col">{labels?.daysLabel ?? 'Days on market'}</th>
+				<th scope="col">{labels?.medianLabel ?? 'Active listing median'}</th>
+				<th scope="col">{labels?.daysLabel ?? 'Median listing age'}</th>
 			</tr>
 		</thead>
 		<tbody>

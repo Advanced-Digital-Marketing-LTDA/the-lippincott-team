@@ -9,6 +9,8 @@ import { compiledMediaModule } from './test-fixtures/compiled-media.mjs';
 
 const require = createRequire(import.meta.resolve('astro/package.json'));
 const { transform } = require('@astrojs/compiler-rs');
+const yamlRequire = createRequire(import.meta.resolve('tinacms'));
+const { parse: parseYaml } = yamlRequire('yaml');
 const source = readFileSync(new URL('../src/components/v2/RegionalMarketComparison.astro', import.meta.url), 'utf8');
 // Inject only the CMS loaders; compile and render the complete real component.
 const prepared = source
@@ -54,7 +56,7 @@ function fixture() {
 }
 
 const missingTable = 'Regional market comparison requires the Northwest Houston #communities data table.';
-const invalidColumns = 'Regional market comparison requires Median list and Days on market in columns 2 and 4.';
+const invalidColumns = 'Regional market comparison requires its active-listing median and listing-age columns in positions 2 and 4.';
 const invalidRows = 'Regional market comparison requires the six cities Cypress, Magnolia, Tomball, Katy, Waller and Hockley with median list price and days on market.';
 const missingSummary = 'Regional market comparison requires a source summary with the reporting period and property scope.';
 const invalidCases = [
@@ -110,7 +112,7 @@ test('valid data and ordinary edits emit complete comparison HTML in both render
 			link: '/updated-market-sources/', linkLabel: 'Full data',
 		} : {
 			heading: 'Northwest Houston at a Glance', caption: 'Northwest Houston market and community comparison',
-			areaLabel: 'Area', medianLabel: 'Median list', daysLabel: 'Days on market',
+			areaLabel: 'Area', medianLabel: 'Active listing median', daysLabel: 'Median listing age',
 			link: '/northwest-houston-real-estate/#communities', linkLabel: 'Sources & full comparison',
 		};
 		const outputs = [];
@@ -151,4 +153,20 @@ test('restoring the source summary restores publication and editor rendering', a
 	for (const isPrerendered of [false, true]) {
 		assert.equal(await render(page, { isPrerendered }), expected);
 	}
+});
+
+test('the actual Northwest Houston CMS table passes prerender validation with qualified display headers', async () => {
+	const regional = parseYaml(readFileSync(new URL('../src/content/page/northwest-houston-real-estate.mdx', import.meta.url), 'utf8').split('---')[1]);
+	const actualTable = regional.blocks.find((block) => block._template === 'dataTable' && block.anchorId === 'communities');
+	assert.ok(actualTable, 'the Northwest Houston community table must exist');
+	const page = { blocks: [{
+		__typename: 'PageBlocksDataTable',
+		...actualTable,
+		summary: { type: 'root', children: [{ type: 'p', children: [{ text: actualTable.summary }] }] },
+	}] };
+	const marketTable = JSON.parse(readFileSync(new URL('../src/content/config/config.json', import.meta.url), 'utf8')).marketTable;
+	const html = parse(await render(page, { isPrerendered: true, marketTable }));
+	assert.deepEqual(html.querySelectorAll('thead th').map((cell) => cell.text), ['Area', 'Active listing median', 'Median listing age']);
+	assert.deepEqual(html.querySelectorAll('tbody tr').map((row) => row.querySelector('th').text), ['Cypress', 'Magnolia', 'Tomball', 'Katy', 'Waller', 'Hockley']);
+	assert.match(html.querySelector('p').text, /property-type filters and exact city boundaries have not been independently verified/i);
 });
