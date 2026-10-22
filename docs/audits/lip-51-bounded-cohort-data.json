@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "source": {
     "title": "LIP-51 bounded cohort evidence",
     "capturedAt": "2026-10-06",
@@ -10,7 +10,10 @@
       "name": "lippincott-url-family-cohort-crosswalk.xlsx",
       "uploadedAt": "2026-10-08",
       "sizeBytes": 40985,
-      "source": "LIP-51 attachment"
+      "libraryFileId": "libfile_26efa6cd6a7481919a8ffc84873cfab1",
+      "version": 0,
+      "sha256": "e25c1aebc869e1b47f4bc2c4ffa644e2f159047b775d4c4fb915c7728667b4a7",
+      "source": "LIP-51 attachment; exact worksheet extraction supplied from the parent thread on 2026-10-22. This executor did not read the binary directly."
     },
     "sourceAuditWorkbook": {
       "name": "lippincott-search-audit-inventory.xlsx",
@@ -23,11 +26,34 @@
     "notes": [
       "Reported URL rows are returned Search Console rows, not unique or indexed URL counts and not an inventory.",
       "Page-family and property-level metrics are separate source scopes and are not reconciled by subtracting one from the other.",
-      "Property-level totals and the accepted 90-day page-family aggregates are separate inputs. Page-family impressions and page-family CTR are not provided.",
+      "Property-level totals and page-family aggregates are separate inputs. The crosswalk provides page-family impressions and CTR, which are validated within that page-level grain and are not substituted for property totals.",
       "The October 6 GSC Opportunities tab contains selected URL-level metrics, but its opportunity set is not a full family census. Those rows were not added to or summed into the family aggregates.",
       "Missing daily rows are not zero-valued observations. The first resumed row is not release or recrawl proof.",
-      "The October 8 crosswalk workbook metadata is verified, but its workbook text was unreadable and signed-URL materialization returned HTTP 403 in this environment. The accepted page-family metrics are preserved from LIP-51 tracker comment 5155 and the bounded-sample decision in comment 12328; no unobserved crosswalk rows were transcribed."
+      "The October 8 crosswalk's five-sheet extraction was supplied from the parent thread after its authorized Library read. This JSON retains the summary cohort rows, IDX subcohorts, source definitions, and query-disclosure denominator used for validation; the workbook binary was not directly available in this executor, and the other raw URL/query rows are not replicated here."
     ]
+  },
+  "cohortDefinitions": {
+    "urlVariantHandling": "Page URL rows retain protocol, host, path, query, and fragment variants as separate rows; path-family grouping does not deduplicate those variants or establish unique pages, intent, listing status, or a one-to-one migration.",
+    "theProperty": [
+      { "id": "property-search", "sourceLabel": "Property-search / IDX", "sourceRule": "Path begins /property-search/. Detail, search-form, and results variants remain separate URL rows." },
+      { "id": "blog", "sourceLabel": "Editorial blog", "sourceRule": "Path begins /blog/. Fragments and URL variants are not collapsed." },
+      { "id": "homepage-variants", "sourceLabel": "Homepage variants", "sourceRule": "Homepage path is /. Protocol and hostname URL rows remain distinct." },
+      { "id": "agents", "sourceLabel": "Legacy agent profiles", "sourceRule": "Path begins /agents/. A family match does not prove a destination mapping." },
+      { "id": "about", "sourceLabel": "About and moved profiles", "sourceRule": "Path begins /about/. This is a page family, not a confirmed one-to-one /agents/ redirect map." },
+      { "id": "other", "sourceLabel": "Other page URLs", "sourceRule": "All other returned page URLs from this property." }
+    ],
+    "oldDomainProperty": [
+      { "id": "homepage", "sourceLabel": "Homepage", "sourceRule": "Path equals /." },
+      { "id": "blog", "sourceLabel": "Editorial /blog/", "sourceRule": "Path begins /blog/." },
+      { "id": "about", "sourceLabel": "Profiles /about/", "sourceRule": "Path begins /about/." },
+      { "id": "agents", "sourceLabel": "Profiles /agents/", "sourceRule": "Path begins /agents/; no returned page rows in the old-domain export." },
+      { "id": "propertySearch", "sourceLabel": "Listings /property-search/", "sourceRule": "Path begins /property-search/; no returned page rows in the old-domain export." },
+      { "id": "market", "sourceLabel": "Market content", "sourceRule": "Path begins /northwest-houston or /cypress-real-estate." },
+      { "id": "editorialRoot", "sourceLabel": "Editorial root paths", "sourceRule": "Root-level editorial URL paths; labels describe path shape, not intent proof." },
+      { "id": "other", "sourceLabel": "Other", "sourceRule": "All other returned page URLs." }
+    ],
+    "idxSubcohortLabels": ["IDX property detail", "IDX search form", "IDX search results", "Other /property-search/"],
+    "reproducibilityLimit": "The supplied extraction preserves the stated family path rules and residual Other labels, but not copied raw URL rows or a deterministic precedence/classifier for reassigning every row. The source definitions and aggregate arithmetic are reproducible here; row-by-row cohort membership is not rebuilt from this JSON. IDX subcohort labels and aggregates are retained as supplied, without inventing additional matching rules."
   },
   "windows": {
     "prior90": { "from": "2026-04-08", "through": "2026-07-06", "days": 90 },
@@ -52,21 +78,67 @@
     "current28": { "clicks": 83, "impressions": 7040, "sourceCtrDecimal": 0.011789772727272727, "averagePosition": 13.793892045454545 }
   },
   "pageFamilyMetrics": {
+    "pageUrlRowTotals": { "prior90": 23380, "current90": 1275, "prior28": 822, "current28": 696 },
     "prior90": [
-      { "id": "property-search", "label": "/property-search/ (IDX)", "urlRows": 23110, "clicks": 840 },
-      { "id": "blog", "label": "/blog/", "urlRows": 22, "clicks": 98 },
-      { "id": "homepage-variants", "label": "Homepage variants", "urlRows": 2, "clicks": 201 },
-      { "id": "agents", "label": "/agents/", "urlRows": 15, "clicks": 50 },
-      { "id": "about", "label": "/about/", "urlRows": 1, "clicks": 12 }
+      { "id": "property-search", "label": "Property-search / IDX", "urlRows": 23110, "clicks": 840, "impressions": 112742, "sourceCtrDecimal": 0.0074506395132248856 },
+      { "id": "blog", "label": "Editorial blog", "urlRows": 22, "clicks": 98, "impressions": 18234, "sourceCtrDecimal": 0.005374574969836569 },
+      { "id": "homepage-variants", "label": "Homepage variants", "urlRows": 2, "clicks": 201, "impressions": 16393, "sourceCtrDecimal": 0.012261331055938511 },
+      { "id": "agents", "label": "Legacy agent profiles", "urlRows": 15, "clicks": 50, "impressions": 6298, "sourceCtrDecimal": 0.007939028262940616 },
+      { "id": "about", "label": "About and moved profiles", "urlRows": 1, "clicks": 12, "impressions": 4017, "sourceCtrDecimal": 0.002987303958177745 },
+      { "id": "other", "label": "Other page URLs", "urlRows": 230, "clicks": 21, "impressions": 23586, "sourceCtrDecimal": 0.0008903586873569067 }
     ],
     "current90": [
-      { "id": "property-search", "label": "/property-search/ (IDX)", "urlRows": 1186, "clicks": 23 },
-      { "id": "blog", "label": "/blog/", "urlRows": 34, "clicks": 9 },
-      { "id": "homepage-variants", "label": "Homepage variants", "urlRows": 2, "clicks": 63 },
-      { "id": "agents", "label": "/agents/", "urlRows": 2, "clicks": 0 },
-      { "id": "about", "label": "/about/", "urlRows": 17, "clicks": 17 }
+      { "id": "property-search", "label": "Property-search / IDX", "urlRows": 1186, "clicks": 23, "impressions": 2704, "sourceCtrDecimal": 0.008505917159763314 },
+      { "id": "blog", "label": "Editorial blog", "urlRows": 34, "clicks": 9, "impressions": 2991, "sourceCtrDecimal": 0.003009027081243731 },
+      { "id": "homepage-variants", "label": "Homepage variants", "urlRows": 2, "clicks": 63, "impressions": 1974, "sourceCtrDecimal": 0.031914893617021274 },
+      { "id": "agents", "label": "Legacy agent profiles", "urlRows": 2, "clicks": 0, "impressions": 3, "sourceCtrDecimal": 0 },
+      { "id": "about", "label": "About and moved profiles", "urlRows": 17, "clicks": 17, "impressions": 1090, "sourceCtrDecimal": 0.015596330275229359 },
+      { "id": "other", "label": "Other page URLs", "urlRows": 34, "clicks": 8, "impressions": 4347, "sourceCtrDecimal": 0.001840349666436623 }
     ],
-    "familyImpressions": { "state": "not_provided" }
+    "prior28": [
+      { "id": "property-search", "label": "Property-search / IDX", "urlRows": 761, "clicks": 11, "impressions": 1575, "sourceCtrDecimal": 0.006984126984126984 },
+      { "id": "blog", "label": "Editorial blog", "urlRows": 12, "clicks": 1, "impressions": 319, "sourceCtrDecimal": 0.003134796238244514 },
+      { "id": "homepage-variants", "label": "Homepage variants", "urlRows": 1, "clicks": 19, "impressions": 620, "sourceCtrDecimal": 0.03064516129032258 },
+      { "id": "agents", "label": "Legacy agent profiles", "urlRows": 0, "clicks": null, "impressions": null, "sourceCtrDecimal": null },
+      { "id": "about", "label": "About and moved profiles", "urlRows": 15, "clicks": 3, "impressions": 237, "sourceCtrDecimal": 0.012658227848101266 },
+      { "id": "other", "label": "Other page URLs", "urlRows": 33, "clicks": 1, "impressions": 1343, "sourceCtrDecimal": 0.0007446016381236039 }
+    ],
+    "current28": [
+      { "id": "property-search", "label": "Property-search / IDX", "urlRows": 612, "clicks": 12, "impressions": 1129, "sourceCtrDecimal": 0.010628875110717449 },
+      { "id": "blog", "label": "Editorial blog", "urlRows": 34, "clicks": 8, "impressions": 2672, "sourceCtrDecimal": 0.0029940119760479044 },
+      { "id": "homepage-variants", "label": "Homepage variants", "urlRows": 2, "clicks": 44, "impressions": 1354, "sourceCtrDecimal": 0.03249630723781388 },
+      { "id": "agents", "label": "Legacy agent profiles", "urlRows": 2, "clicks": 0, "impressions": 3, "sourceCtrDecimal": 0 },
+      { "id": "about", "label": "About and moved profiles", "urlRows": 17, "clicks": 14, "impressions": 853, "sourceCtrDecimal": 0.016412661195779603 },
+      { "id": "other", "label": "Other page URLs", "urlRows": 29, "clicks": 7, "impressions": 3004, "sourceCtrDecimal": 0.002330226364846871 }
+    ],
+    "grain": "Returned page URL rows by path-family rule. URL rows are not unique indexed pages, inventory counts, or property totals."
+  },
+  "idxSubcohorts": {
+    "prior90": [
+      { "id": "detail", "label": "IDX property detail", "urlRows": 22515, "clicks": 821, "impressions": 108288, "sourceCtrDecimal": 0.007581634160756501 },
+      { "id": "searchForm", "label": "IDX search form", "urlRows": 1, "clicks": 7, "impressions": 2299, "sourceCtrDecimal": 0.003044802087864289 },
+      { "id": "searchResults", "label": "IDX search results", "urlRows": 590, "clicks": 12, "impressions": 2047, "sourceCtrDecimal": 0.005862237420615535 },
+      { "id": "other", "label": "Other /property-search/", "urlRows": 4, "clicks": 0, "impressions": 108, "sourceCtrDecimal": 0 }
+    ],
+    "current90": [
+      { "id": "detail", "label": "IDX property detail", "urlRows": 1148, "clicks": 23, "impressions": 2649, "sourceCtrDecimal": 0.008682521706304265 },
+      { "id": "searchForm", "label": "IDX search form", "urlRows": 0, "clicks": null, "impressions": null, "sourceCtrDecimal": null },
+      { "id": "searchResults", "label": "IDX search results", "urlRows": 38, "clicks": 0, "impressions": 55, "sourceCtrDecimal": 0 },
+      { "id": "other", "label": "Other /property-search/", "urlRows": 0, "clicks": null, "impressions": null, "sourceCtrDecimal": null }
+    ],
+    "prior28": [
+      { "id": "detail", "label": "IDX property detail", "urlRows": 741, "clicks": 11, "impressions": 1552, "sourceCtrDecimal": 0.007087628865979381 },
+      { "id": "searchForm", "label": "IDX search form", "urlRows": 0, "clicks": null, "impressions": null, "sourceCtrDecimal": null },
+      { "id": "searchResults", "label": "IDX search results", "urlRows": 20, "clicks": 0, "impressions": 23, "sourceCtrDecimal": 0 },
+      { "id": "other", "label": "Other /property-search/", "urlRows": 0, "clicks": null, "impressions": null, "sourceCtrDecimal": null }
+    ],
+    "current28": [
+      { "id": "detail", "label": "IDX property detail", "urlRows": 593, "clicks": 12, "impressions": 1097, "sourceCtrDecimal": 0.010938924339106655 },
+      { "id": "searchForm", "label": "IDX search form", "urlRows": 0, "clicks": null, "impressions": null, "sourceCtrDecimal": null },
+      { "id": "searchResults", "label": "IDX search results", "urlRows": 19, "clicks": 0, "impressions": 32, "sourceCtrDecimal": 0 },
+      { "id": "other", "label": "Other /property-search/", "urlRows": 0, "clicks": null, "impressions": null, "sourceCtrDecimal": null }
+    ],
+    "statusLimit": "Only MIG-015 and MIG-016 sampled detail URLs and MIG-017 sampled the generic search form. These probes do not classify the remaining URLs."
   },
   "otherPropertyScopes": {
     "separateDomainProperty": "sc-domain:lippincottteam.com",
@@ -76,11 +148,57 @@
       "prior28": { "clicks": 97, "impressions": 7048, "sourceCtrDecimal": 0.0137627695800227, "averagePosition": 17.959704880817252, "returnedDays": 28, "windowDays": 28 },
       "current28": { "clicks": 20, "impressions": 2674, "sourceCtrDecimal": 0.0074794315632011965, "averagePosition": 3.945400149588631, "returnedDays": 28, "windowDays": 28 }
     },
+    "pageFamilyMetrics": {
+      "pageUrlRowTotals": { "prior90": 42, "current90": 41, "prior28": 33, "current28": 24 },
+      "prior90": [
+        { "id": "homepage", "label": "Homepage", "urlRows": 2, "clicks": 121, "impressions": 8280, "sourceCtrDecimal": 0.014613526570048309 },
+        { "id": "blog", "label": "Editorial /blog/", "urlRows": 10, "clicks": 1, "impressions": 808, "sourceCtrDecimal": 0.0012376237623762376 },
+        { "id": "about", "label": "Profiles /about/", "urlRows": 2, "clicks": 4, "impressions": 2744, "sourceCtrDecimal": 0.0014577259475218659 },
+        { "id": "agents", "label": "Profiles /agents/", "urlRows": 0, "clicks": null, "impressions": null, "sourceCtrDecimal": null },
+        { "id": "propertySearch", "label": "Listings /property-search/", "urlRows": 0, "clicks": null, "impressions": null, "sourceCtrDecimal": null },
+        { "id": "market", "label": "Market content", "urlRows": 18, "clicks": 3, "impressions": 15312, "sourceCtrDecimal": 0.00019592476489028212 },
+        { "id": "editorialRoot", "label": "Editorial root paths", "urlRows": 5, "clicks": 0, "impressions": 30, "sourceCtrDecimal": 0 },
+        { "id": "other", "label": "Other", "urlRows": 5, "clicks": 2, "impressions": 1374, "sourceCtrDecimal": 0.001455604075691412 }
+      ],
+      "current90": [
+        { "id": "homepage", "label": "Homepage", "urlRows": 3, "clicks": 239, "impressions": 15384, "sourceCtrDecimal": 0.015535621424856995 },
+        { "id": "blog", "label": "Editorial /blog/", "urlRows": 13, "clicks": 4, "impressions": 1449, "sourceCtrDecimal": 0.0027605244996549345 },
+        { "id": "about", "label": "Profiles /about/", "urlRows": 5, "clicks": 9, "impressions": 2144, "sourceCtrDecimal": 0.004197761194029851 },
+        { "id": "agents", "label": "Profiles /agents/", "urlRows": 0, "clicks": null, "impressions": null, "sourceCtrDecimal": null },
+        { "id": "propertySearch", "label": "Listings /property-search/", "urlRows": 0, "clicks": null, "impressions": null, "sourceCtrDecimal": null },
+        { "id": "market", "label": "Market content", "urlRows": 15, "clicks": 8, "impressions": 12274, "sourceCtrDecimal": 0.0006517842594101353 },
+        { "id": "editorialRoot", "label": "Editorial root paths", "urlRows": 0, "clicks": null, "impressions": null, "sourceCtrDecimal": null },
+        { "id": "other", "label": "Other", "urlRows": 5, "clicks": 1, "impressions": 2050, "sourceCtrDecimal": 0.0004878048780487805 }
+      ],
+      "prior28": [
+        { "id": "homepage", "label": "Homepage", "urlRows": 1, "clicks": 90, "impressions": 4880, "sourceCtrDecimal": 0.018442622950819672 },
+        { "id": "blog", "label": "Editorial /blog/", "urlRows": 9, "clicks": 1, "impressions": 523, "sourceCtrDecimal": 0.0019120458891013384 },
+        { "id": "about", "label": "Profiles /about/", "urlRows": 4, "clicks": 3, "impressions": 581, "sourceCtrDecimal": 0.0051635111876075735 },
+        { "id": "agents", "label": "Profiles /agents/", "urlRows": 0, "clicks": null, "impressions": null, "sourceCtrDecimal": null },
+        { "id": "propertySearch", "label": "Listings /property-search/", "urlRows": 0, "clicks": null, "impressions": null, "sourceCtrDecimal": null },
+        { "id": "market", "label": "Market content", "urlRows": 15, "clicks": 3, "impressions": 2755, "sourceCtrDecimal": 0.001088929219600726 },
+        { "id": "editorialRoot", "label": "Editorial root paths", "urlRows": 0, "clicks": null, "impressions": null, "sourceCtrDecimal": null },
+        { "id": "other", "label": "Other", "urlRows": 4, "clicks": 0, "impressions": 583, "sourceCtrDecimal": 0 }
+      ],
+      "current28": [
+        { "id": "homepage", "label": "Homepage", "urlRows": 3, "clicks": 20, "impressions": 2601, "sourceCtrDecimal": 0.007689350249903883 },
+        { "id": "blog", "label": "Editorial /blog/", "urlRows": 9, "clicks": 0, "impressions": 53, "sourceCtrDecimal": 0 },
+        { "id": "about", "label": "Profiles /about/", "urlRows": 5, "clicks": 0, "impressions": 8, "sourceCtrDecimal": 0 },
+        { "id": "agents", "label": "Profiles /agents/", "urlRows": 0, "clicks": null, "impressions": null, "sourceCtrDecimal": null },
+        { "id": "propertySearch", "label": "Listings /property-search/", "urlRows": 0, "clicks": null, "impressions": null, "sourceCtrDecimal": null },
+        { "id": "market", "label": "Market content", "urlRows": 4, "clicks": 0, "impressions": 33, "sourceCtrDecimal": 0 },
+        { "id": "editorialRoot", "label": "Editorial root paths", "urlRows": 0, "clicks": null, "impressions": null, "sourceCtrDecimal": null },
+        { "id": "other", "label": "Other", "urlRows": 3, "clicks": 0, "impressions": 6, "sourceCtrDecimal": 0 }
+      ]
+    },
     "overlappingUrlPrefixProperty": "excluded from the reported property totals; do not add overlapping URL prefixes"
   },
   "queryMetrics": {
-    "state": "not_included",
-    "disclosure": "No query-level values are included in this bounded comparison. Do not infer query-level movement or disclose query details from these page/property aggregates."
+    "state": "disclosed_subset_not_reproduced",
+    "selectedQueryRows": 253,
+    "sourceCurrentThePageQueryRows": 736,
+    "coverage": "The workbook query tab contains a selected subset, not the full Search Console query set.",
+    "disclosure": "Brand-like, strict-brand, and disclosed nonbrand classifications apply only to disclosed rows. Undisclosed clicks are not assigned to nonbrand; broad surname matches may refer to another entity. Query-level values are not reproduced here, and no query movement is inferred."
   },
   "routeProbeSample": {
     "observedAt": "2026-10-06",
