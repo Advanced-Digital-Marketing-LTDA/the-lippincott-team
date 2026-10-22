@@ -53,7 +53,7 @@ for (const [source, destination] of redirects) {
 
 
 
-// Static 301 behavior is configured in astro.config.mjs and public/_redirects.
+// On-demand 301 behavior is served by the shared handler and mirrored in public/_redirects.
 // Audit each selected destination against the production build for a live, canonical page.
 for (const [source, destination] of legacyRedirects) {
 	test(`${source} emits one HTTP 301, preserves queries, and reaches its destination`, async () => {
@@ -72,7 +72,7 @@ for (const [source, destination] of legacyRedirects) {
 					assert.match(target.headers.get('content-type') || '', /^image\/jpeg\b/i);
 				} else {
 					const html = await target.text();
-					assert.match(html, /<h1[\\s>]/, destination);
+					assert.match(html, /<h1[\s>]/, destination);
 					assert.ok(html.includes(`<link rel="canonical" href="https://thelippincottteam.com${destination}"`), destination);
 				}
 			}
