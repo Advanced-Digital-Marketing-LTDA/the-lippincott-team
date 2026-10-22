@@ -17,8 +17,8 @@ const comparison = blocks.find(
 const medianHeader = comparison?.headers?.[1]?.heading?.trim().toLowerCase();
 const daysHeader = comparison?.headers?.[3]?.heading?.trim().toLowerCase();
 const hasExpectedColumns =
-	['median list', 'active listing median'].includes(medianHeader ?? '') &&
-	['days on market', 'median listing age'].includes(daysHeader ?? '');
+	medianHeader === 'active listing median' &&
+	daysHeader === 'median listing age';
 const sourceSummary = richTextToPlainText(comparison?.summary);
 let validationError: string | undefined;
 if (!comparison) {

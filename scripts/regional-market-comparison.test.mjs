@@ -48,7 +48,7 @@ function fixture() {
 	return { blocks: [{
 		__typename: 'PageBlocksDataTable', anchorId: 'communities',
 		summary: { type: 'root', children: [{ type: 'p', children: [{ text: 'HAR.com single-family active listings, September 2026, for six cities.' }] }] },
-		headers: ['Area', 'Median list', 'For sale', 'Days on market', 'Character'].map((heading) => ({ heading })),
+		headers: ['Area', 'Active listing median', 'Active listings', 'Median listing age', 'Character'].map((heading) => ({ heading })),
 		rows: ['Cypress', 'Magnolia', 'Tomball', 'Katy', 'Waller', 'Hockley'].map((market) => ({
 			cells: [{ text: market }, { text: '$445,000' }, { text: '2,178' }, { text: '71' }, { text: 'Community character' }],
 		})),
@@ -80,6 +80,10 @@ const invalidCases = [
 		for (const row of page.blocks[0].rows) row.cells.splice(2, 1);
 	}, invalidColumns],
 	['missing header', (page) => { page.blocks[0].headers[1] = null; }, invalidColumns],
+	['legacy unqualified headers', (page) => {
+		page.blocks[0].headers[1].heading = 'Median list';
+		page.blocks[0].headers[3].heading = 'Days on market';
+	}, invalidColumns],
 ];
 
 for (const [name, change, message] of invalidCases) {
@@ -103,8 +107,8 @@ test('valid data and ordinary edits emit complete comparison HTML in both render
 			page.blocks[0].rows[0].cells[1].text = '$460,000';
 			page.blocks[0].rows[0].cells[3].text = '60';
 			page.blocks[0].summary.children[0].children[0].text = 'Updated reporting period and source <not markup>.';
-			page.blocks[0].headers[1].heading = ' MEDIAN LIST ';
-			page.blocks[0].headers[3].heading = ' days on MARKET ';
+			page.blocks[0].headers[1].heading = ' ACTIVE LISTING MEDIAN ';
+			page.blocks[0].headers[3].heading = ' Median listing AGE ';
 		}
 		const labels = edit ? {
 			heading: 'Current regional markets', caption: 'Compare communities',

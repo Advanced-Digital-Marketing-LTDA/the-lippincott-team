@@ -58,3 +58,19 @@ test('shared data tables retain accessible captions, scoped headers, and left-al
   assert.match(table, /<th scope="col"/);
   assert.match(table, /<th scope="row"[^\n]*class=\{`\$\{cellClass\} text-left`\}/);
 });
+
+test('HAR ledger records a source and complete scope/review metadata for each approved claim', async () => {
+  const ledger = await readFile(new URL('../docs/audits/lip-65-har-claim-ledger.md', import.meta.url), 'utf8');
+  assert.match(ledger, /\| Claim ID \| Geography and boundary \| Property type \| Statistic and unit \| Active\/sold population \| Period \| Exact HAR source \| Calculation \| Placement \| Retrieval \| Reviewer \| Next review \|/);
+  const claims = ledger.split('\n').filter((line) => /^\| HAR-/.test(line));
+  assert.equal(claims.length, 11);
+  for (const claim of claims) {
+    const fields = claim.split('|').slice(1, -1).map((field) => field.trim());
+    assert.equal(fields.length, 12, `all ledger columns must be present for ${fields[0]}`);
+    assert.ok(fields.every(Boolean), `all required ledger fields must be populated for ${fields[0]}`);
+    assert.match(fields[6], /https:\/\/www\.har\.com\//, `source must be an exact HAR URL for ${fields[0]}`);
+    assert.match(fields[9], /October 22, 2026/, `retrieval must be recorded for ${fields[0]}`);
+    assert.match(fields[10], /LIP-65 verification/, `reviewer must be recorded for ${fields[0]}`);
+    assert.match(fields[11], /November 9, 2026/, `next review must be recorded for ${fields[0]}`);
+  }
+});
