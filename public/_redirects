@@ -25,3 +25,6 @@
 
 # Cimarron community guide was unpublished (the team does not sell there).
 /northwest-houston-real-estate/katy-tx-real-estate/cimarron-real-estate/  /northwest-houston-real-estate/katy-tx-real-estate/  301
+
+# Preserve links to the legacy WordPress upload; the image now lives in Astro's uploads directory.
+/wp-content/uploads/2026/04/townelake2.jpg  /uploads/2026/04/townelake2.jpg  301
