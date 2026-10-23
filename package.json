@@ -18,7 +18,8 @@
       "js-yaml@3.15.0": "3.15.1",
       "js-yaml@4.3.0": "4.3.1",
       "brace-expansion": "5.0.9",
-      "source-map-js": "^1.2.2"
+      "source-map-js": "^1.2.2",
+      "toml": "^5.0.1"
     }
   },
   "engines": {
