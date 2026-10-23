@@ -5,19 +5,19 @@
 > Hockley. 1,463+ homes sold, 4.9 rating across 750+ five-star reviews on Google and HAR.com, and nine Houston
 > Business Journal Residential Real Estate Awards (2017–2025).
 
-Contact: 713-494-1818 · info@lippincottteam.com · https://thelippincottteam.com
+Contact: 713-494-1818 · amy@lippincottteam.com · https://thelippincottteam.com
 
 ## Buying and selling
 
 - [Homepage](https://thelippincottteam.com/): Team overview, results, reviews and community coverage.
 - [Buyers](https://thelippincottteam.com/buy/): The buyer process with the team — first-time, move-up, new construction and relocation.
 - [Sellers](https://thelippincottteam.com/sell/): Pricing, staging and selling with the team.
-- [Contact / schedule a consultation](https://thelippincottteam.com/contact-us/): Netlify contact form, phone and email.
+- [Contact / schedule a consultation](https://thelippincottteam.com/contact-us/): Contact form, phone and email.
 - [Reviews](https://thelippincottteam.com/reviews/): Verified client reviews from Google and HAR.com.
 
-## Communities (NW Houston real estate guides)
+## Communities (Northwest Houston community pages)
 
-- [Northwest Houston real estate](https://thelippincottteam.com/northwest-houston-real-estate/): Hub for all community guides.
+- [Northwest Houston real estate](https://thelippincottteam.com/northwest-houston-real-estate/): Hub for all community pages.
 - [Cypress, TX](https://thelippincottteam.com/northwest-houston-real-estate/cypress-tx-real-estate/): Master-planned lakes, Cy-Fair ISD, the 290 corridor.
 - [Bridgeland](https://thelippincottteam.com/northwest-houston-real-estate/cypress-tx-real-estate/bridgeland-real-estate/): 11,500-acre master-planned community, one of Greater Houston's top-selling MPCs.
 - [Towne Lake](https://thelippincottteam.com/northwest-houston-real-estate/cypress-tx-real-estate/towne-lake-real-estate/): Waterfront living and the boardwalk.
@@ -28,9 +28,9 @@ Contact: 713-494-1818 · info@lippincottteam.com · https://thelippincottteam.co
 - [Waller, TX](https://thelippincottteam.com/northwest-houston-real-estate/waller-tx-real-estate/): Acreage and new-construction value.
 - [Hockley, TX](https://thelippincottteam.com/northwest-houston-real-estate/hockley-tx-real-estate/): Rural-fringe lots and custom-build land.
 
-## School districts (NW Houston schools real estate guides)
+## School districts (Northwest Houston school pages)
 
-- [Northwest Houston schools real estate](https://thelippincottteam.com/northwest-houston-schools-real-estate/): Hub for district guides.
+- [Northwest Houston schools real estate](https://thelippincottteam.com/northwest-houston-schools-real-estate/): Hub for district pages.
 - [Cypress-Fairbanks ISD](https://thelippincottteam.com/northwest-houston-schools-real-estate/cypress-fairbanks-isd-real-estate/)
 - [Katy ISD](https://thelippincottteam.com/northwest-houston-schools-real-estate/katy-isd-real-estate/)
 - [Tomball ISD](https://thelippincottteam.com/northwest-houston-schools-real-estate/tomball-isd-real-estate/)
@@ -54,7 +54,7 @@ Contact: 713-494-1818 · info@lippincottteam.com · https://thelippincottteam.co
 
 ## Notes for LLMs
 
-- Market figures in the community and school guides are researched per community and carry
-  source citations on the page (Realtor.com local-market pages, district sites, U.S. News).
-  Prefer quoting a stat together with its cited source.
+- Market figures in the community and school pages carry their cited source and reporting period.
+  Property scope and school-fact sources appear only where the page provides them; do not infer
+  either. Quote a stat together with its source, reporting period and scope as shown on the page.
 - Property search is hosted externally on the team's Sierra site, linked from community pages.

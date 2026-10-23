@@ -1,0 +1,34 @@
+name: Ratchets
+
+# Free gates that stop a PR from making CI green by weakening it: more skipped tests,
+# more lint/type suppressions, or more `any`. Baselines are today's counts; lower them
+# as the codebase improves, never raise them. Input names follow the actions' READMEs
+# (motchalini-llc/*@v1); confirm against the Marketplace pages on first run.
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  ratchets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: motchalini-llc/test-ratchet@179a93cd0f66d2690944ccafdf77f83ff6175ef3 # v1
+        with:
+          language: typescript
+          baseline-skip: '0'
+      - uses: motchalini-llc/suppress-ratchet@7d9b6e088379625af9c6613c7ca7f2f402afa568 # v1
+        with:
+          language: typescript
+          baseline-suppress: '0'
+      - uses: motchalini-llc/type-ratchet@c009fc38175c9e8970b832fe021eceb638332801 # v1
+        with:
+          language: typescript
+          baseline-any: '2'
+          baseline-suppress: '0'
