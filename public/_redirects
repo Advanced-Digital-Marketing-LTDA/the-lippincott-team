@@ -1,8 +1,7 @@
-# Legacy WordPress URLs that have no Astro equivalent — send them to the
-# closest live page. Netlify reads this file from the publish directory;
+# Explicit permanent redirects for legacy WordPress URLs whose paths no longer
+# match live Astro routes. Netlify reads this file from the publish directory;
 # Astro copies `public/` verbatim, so it lands at dist/client/_redirects.
-# Every other WP URL from the migration (scripts/migrate/data/) maps 1:1 onto
-# an existing route and needs no redirect.
+# Same-path URLs already reaching their live pages do not need an entry.
 
 # Cookie/consent opt-out page was dropped; the privacy policy covers it.
 /opt-out-preferences/*  /privacy-policy/  301
@@ -25,3 +24,32 @@
 
 # Cimarron community guide was unpublished (the team does not sell there).
 /northwest-houston-real-estate/katy-tx-real-estate/cimarron-real-estate/  /northwest-houston-real-estate/katy-tx-real-estate/  301
+
+# Preserve links to the legacy WordPress upload; the image now lives in Astro's uploads directory.
+/wp-content/uploads/2026/04/townelake2.jpg  /uploads/2026/04/townelake2.jpg  301
+
+
+# Legacy school directory paths now point to the matching district guides.
+/schools/katy-isd/  /northwest-houston-schools-real-estate/katy-isd-real-estate/  301
+/schools/tomball-isd/  /northwest-houston-schools-real-estate/tomball-isd-real-estate/  301
+/schools/waller-isd/  /northwest-houston-schools-real-estate/waller-isd-real-estate/  301
+/schools/cypress-fairbanks-isd/  /northwest-houston-schools-real-estate/cypress-fairbanks-isd-real-estate/  301
+
+# Blog URLs whose article or category slugs changed during migration.
+/blog/sell-your-home-cypress-tx/  /blog/sell-your-home-in-cypress-tx-when-is-the-right-time/  301
+/blog/cost-of-living-tomball-tx  /blog/cost-of-living-in-tomball-tx-big-value-in-a-growing-texas-community/  301
+/blog/first-time-homebuyers-cypress-tx/  /blog/first-time-homebuyers-in-cypress-tx-your-step-by-step-guide-to-success/  301
+/blog/category/living-in-waller-tx/  /blog/  301
+
+# Legacy agent directory slugs now use the current About bio paths.
+/agents/j-r-satchel/  /about/j-r-satchel-2/  301
+/agents/katietuley/  /about/katie-tuley-2/  301
+/agents/jennipher-stringer/  /about/jennipher-stringer-2/  301
+/agents/natalie-buenrostro/  /about/natalie-buenrostro-2/  301
+/agents/ryan-zimmerman/  /about/ryan-zimmerman-2/  301
+/agents/stacy-hooper/  /about/stacy-hooper-2/  301
+
+# Legacy area and community directory paths moved to current location pages.
+/communities/  /northwest-houston-real-estate/  301
+/hempstead/  /northwest-houston-real-estate/  301
+/magnolia/  /northwest-houston-real-estate/magnolia-tx-real-estate/  301

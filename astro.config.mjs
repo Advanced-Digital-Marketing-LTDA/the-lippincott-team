@@ -17,10 +17,10 @@ import tailwindcss from '@tailwindcss/vite';
 // Fail before adapter/content compilation when a build is misconfigured.
 parseCdnConfig(process.env);
 
-// Host-neutral: every content page prerenders to static HTML, and the one
-// on-demand route (/tina-island, the visual-editing endpoint) is served by
-// whichever host built the site. Each platform sets its own build env var
-// automatically — nothing to configure — and any other host (including a
+// Host-neutral: content pages prerender to static HTML; on-demand routes
+// (visual editing, API handlers, and query-preserving legacy redirects) are
+// served by whichever host built the site. Each platform sets its own build env
+// var automatically — nothing to configure — and any other host (including a
 // local `wrangler deploy`) falls back to a portable Node server. Set
 // DEPLOY_ADAPTER to force a specific adapter when no env var applies.
 async function getAdapter() {
@@ -86,10 +86,9 @@ export default defineConfig({
 	},
 	redirects: {
 		'/home': '/',
-		// Legacy WordPress URL (exact path). The `/opt-out-preferences/*`,
-		// `/author/*`, `/buyers/*`, and `/sellers/*` families are handled by
-		// host-neutral redirect endpoints under src/pages/<prefix>/[...slug].ts
-		// (mirrored in public/_redirects, which Netlify's CDN reads directly).
+		// Simple legacy aliases live here. Query-sensitive exact paths and the
+		// `/opt-out-preferences/*`, `/author/*`, `/buyers/*`, and `/sellers/*`
+		// families use endpoint routes under src/pages and mirror public/_redirects.
 		'/team-member-page-design/': { status: 301, destination: '/about/' },
 		// Cimarron community guide was unpublished (the team does not sell
 		// there); send the old URL to the Katy guide so indexed links do not 404.

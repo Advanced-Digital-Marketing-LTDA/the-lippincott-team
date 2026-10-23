@@ -9,7 +9,7 @@ export const statLedgerBlockSchema: Template = {
 		{
 			type: 'object', label: 'Tiles', name: 'tiles', list: true,
 			ui: {
-				defaultItem: { figure: '$445,000', label: 'Median list price', source: 'Realtor.com · Jun 2026' },
+				defaultItem: { figure: '$450,000', label: 'Median list price', source: 'HAR.com · Sep 2026' },
 				itemProps: (i: { figure?: string; label?: string }) => ({ label: `${i.figure ?? ''} ${i.label ?? ''}`.trim() }),
 			},
 			fields: [
@@ -26,8 +26,8 @@ export const statLedgerBlockSchema: Template = {
 		defaultItem: {
 			title: 'What is the market doing **this year?**',
 			tiles: [
-				{ figure: '$445,000', label: 'Median list price', source: 'Realtor.com · Jun 2026' },
-				{ figure: '71 days', label: 'Median on market', source: 'Realtor.com · Jun 2026' },
+				{ figure: '$450,000', label: 'Median list price', source: 'HAR.com · Sep 2026' },
+				{ figure: '42 days', label: 'Median active-listing days', source: 'HAR.com · Sep 2026' },
 				{ figure: '98%', label: 'Of asking price', source: 'Sale-to-list · Realtor.com', invert: true },
 			],
 		},

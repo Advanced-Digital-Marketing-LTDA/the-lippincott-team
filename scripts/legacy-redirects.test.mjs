@@ -1,10 +1,16 @@
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import { test } from 'node:test';
+import { legacyRedirects } from '../src/lib/legacy-redirect-data.mjs';
 
 const redirects = [
 	{ source: '/agents/amy-lippincott/', destination: '/about/amy-lippincott-2/', file: 'agents/amy-lippincott.ts' },
 	{ source: '/contact/', destination: '/contact-us/', file: 'contact.ts' },
+	...legacyRedirects.map(([source, destination]) => ({
+		source,
+		destination,
+		file: `${source.slice(1).replace(/\/$/, '')}.ts`,
+	})),
 ];
 const netlifyRules = readFileSync(new URL('../public/_redirects', import.meta.url), 'utf8')
 	.split('\n')
@@ -27,7 +33,7 @@ function requestRedirect(route, source, { method = 'GET', suffix = '' } = {}) {
 }
 
 for (const { source, destination, file } of redirects) {
-	test(`${source} permanently redirects GET and HEAD to its equivalent page`, async () => {
+	test(`${source} permanently redirects GET and HEAD to its destination`, async () => {
 		const route = await loadRoute(file);
 		assert.equal(route.prerender, false, 'Must emit an HTTP redirect rather than static meta refresh');
 		for (const method of ['GET', 'HEAD']) {
@@ -63,3 +69,10 @@ for (const { source, destination, file } of redirects) {
 		assert.deepEqual(rules, [[source, destination, '301']]);
 	});
 }
+
+test('/wp-content/uploads/2026/04/townelake2.jpg has a matching exact permanent Netlify rule', () => {
+	const source = '/wp-content/uploads/2026/04/townelake2.jpg';
+	const destination = '/uploads/2026/04/townelake2.jpg';
+	const rules = netlifyRules.filter(([from]) => from === source);
+	assert.deepEqual(rules, [[source, destination, '301']]);
+});

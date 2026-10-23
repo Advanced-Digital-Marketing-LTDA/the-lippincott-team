@@ -22,7 +22,9 @@ export const islands: IslandRegistry = {
 	page: {
 		fetch: (_request, params) => getPage(params.get('slug') ?? 'home'),
 		component: PageBody,
-		wrapper: { tag: 'main' },
+		// Base.astro already provides the page's main landmark. Keep the
+		// editable island wrapper neutral to avoid nesting main landmarks.
+		wrapper: { tag: 'div' },
 		propsFromData: (data) => ({
 			data: (data as QueryResult<PageQuery>).data?.page as CmsPage | undefined,
 		}),
