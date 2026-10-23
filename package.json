@@ -6,18 +6,22 @@
   "pnpm": {
     "overrides": {
       "lodash": "4.18.1",
-      "undici": "^7.29.0",
+      "undici": "^7.30.1",
       "sharp": "^0.35.5",
       "linkify-it": "^5.0.2",
       "esbuild": "^0.28.1",
       "vite@^4>esbuild": "0.18.20",
       "vite@^6>esbuild": "0.27.5",
-      "fast-uri": "3.1.5",
+      "fast-uri": "3.1.9",
       "path-to-regexp@6.1.0": "6.3.0",
       "nanoid@3.3.16": "3.3.18",
-      "js-yaml@3.15.0": "3.15.1",
-      "js-yaml@4.3.0": "4.3.1",
-      "brace-expansion": "5.0.9"
+      "js-yaml@3.15.0": "3.15.2",
+      "js-yaml@4.3.0": "4.3.2",
+      "brace-expansion": "5.0.12",
+      "source-map-js": "^1.2.2",
+      "toml": "^5.0.1",
+      "postcss-selector-parser": "7.1.7",
+      "smol-toml@1.7.0": "1.9.1"
     }
   },
   "engines": {
@@ -39,7 +43,7 @@
   "dependencies": {
     "@astrojs/cloudflare": "^14.1.4",
     "@astrojs/mdx": "^7.0.3",
-    "@astrojs/netlify": "^8.1.2",
+    "@astrojs/netlify": "^8.2.4",
     "@astrojs/node": "^11.1.6",
     "@astrojs/rss": "4.0.19",
     "@astrojs/sitemap": "^3.7.3",
@@ -52,19 +56,19 @@
     "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.3.0",
     "@tinacms/astro": "^0.7.0",
-    "astro": "7.2.8",
-    "astro-icon": "^1.1.5",
+    "astro": "7.4.1",
+    "astro-icon": "^1.2.0",
     "clsx": "^2.1.1",
     "gsap": "^3.15.0",
     "sharp": "^0.35.5",
     "tailwind-merge": "^3.6.0",
     "tailwind-variants": "^3.2.2",
     "tailwindcss": "^4.3.0",
-    "tinacms": "^3.12.0"
+    "tinacms": "^3.15.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
-    "@tinacms/cli": "^2.6.0",
+    "@tinacms/cli": "^3.0.0",
     "@types/node": "^25.9.1",
     "@types/turndown": "^5.0.6",
     "node-html-parser": "^9.0.0",
@@ -74,6 +78,6 @@
     "react-dom": "^19.2.7",
     "turndown": "^7.2.4",
     "typescript": "^6.0.3",
-    "vite": "^8.2.1"
+    "vite": "^8.3.5"
   }
 }
