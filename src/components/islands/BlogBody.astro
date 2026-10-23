@@ -53,9 +53,39 @@ const related = data
 		})
 		.slice(0, 3)
 	: [];
+
+// JSON-LD BlogPosting from the post's own fields; author matches the visible
+// byline, publisher references the homepage RealEstateAgent node by @id.
+const authorSlug = author?._sys?.filename;
+const modifiedDate = data?.updatedDate ?? data?.pubDate;
+const blogJsonLd = data && {
+	'@context': 'https://schema.org',
+	'@type': 'BlogPosting',
+	headline: data.title,
+	...(data.description ? { description: data.description } : {}),
+	...(data.pubDate ? { datePublished: new Date(data.pubDate).toISOString() } : {}),
+	...(modifiedDate ? { dateModified: new Date(modifiedDate).toISOString() } : {}),
+	...(data.heroImage ? { image: new URL(mediaUrl(data.heroImage, mediaSite), mediaSite).href } : {}),
+	mainEntityOfPage: new URL(`/blog/${data._sys.filename}/`, mediaSite).href,
+	...(author?.name
+		? {
+				author: {
+					'@type': 'Person',
+					name: author.name,
+					...(authorSlug ? { url: new URL(`/about/${authorSlug}/`, mediaSite).href } : {}),
+				},
+			}
+		: {}),
+	publisher: {
+		'@type': 'RealEstateAgent',
+		...(Astro.site ? { '@id': `${Astro.site.href}#team` } : {}),
+		...(config?.seo?.title ? { name: config.seo.title } : {}),
+	},
+};
 ---
 {data && (
 	<>
+		{blogJsonLd && <script type="application/ld+json" is:inline set:html={JSON.stringify(blogJsonLd).replace(/</g, '\\u003c')} />}
 		<section class="pt-10 md:pt-14">
 			<div class="mx-auto max-w-[1200px] px-6 md:px-12">
 				<nav aria-label="Breadcrumb" class="flex flex-wrap items-center gap-2 text-[13px] text-muted-foreground">
