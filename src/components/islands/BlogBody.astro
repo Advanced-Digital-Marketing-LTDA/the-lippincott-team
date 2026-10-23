@@ -5,6 +5,7 @@ import TinaMarkdown from '@tinacms/astro/TinaMarkdown.astro';
 import { tinaField } from '@tinacms/astro/tina-field';
 import { getConfig, getTeamMember, listBlogs, type CmsBlog, type CmsTeam } from '../../lib/data';
 import { extractToc, readingTimeMinutes } from '../../lib/article';
+import { buildBlogPostingJsonLd, resolveBlogAuthor, serializeJsonLd } from '../../lib/blog-schema';
 import { hasRichText } from '../../lib/rich-text';
 import { safeHref } from '../../lib/url';
 import FormattedDate from '../FormattedDate.astro';
@@ -21,15 +22,11 @@ const { data } = Astro.props;
 const config = (await getConfig()).data?.config ?? null;
 const blogCopy = config?.blogPost ?? null;
 const preferredSources = config?.preferredSources ?? null;
-// Byline + author box: the post's `author` reference wins; posts that never
-// set it fall back to Amy's team doc (the live site's historical byline).
-const authorRef = data?.author;
+// Byline + author box: the post's author, else Amy (see resolveBlogAuthor).
 const author = data
-	? authorRef && typeof authorRef === 'object'
-		? (authorRef as CmsTeam)
-		: await getTeamMember('amy-lippincott-2')
-			.then((res) => res.data?.team ?? null)
-			.catch(() => null)
+	? await resolveBlogAuthor<CmsTeam>(data.author, () =>
+			getTeamMember('amy-lippincott-2').then((res) => res.data?.team ?? null),
+		)
 	: null;
 
 const toc = extractToc(data?.body);
@@ -54,38 +51,22 @@ const related = data
 		.slice(0, 3)
 	: [];
 
-// JSON-LD BlogPosting from the post's own fields; author matches the visible
-// byline, publisher references the homepage RealEstateAgent node by @id.
-const authorSlug = author?._sys?.filename;
-const modifiedDate = data?.updatedDate ?? data?.pubDate;
-const blogJsonLd = data && {
-	'@context': 'https://schema.org',
-	'@type': 'BlogPosting',
-	headline: data.title,
-	...(data.description ? { description: data.description } : {}),
-	...(data.pubDate ? { datePublished: new Date(data.pubDate).toISOString() } : {}),
-	...(modifiedDate ? { dateModified: new Date(modifiedDate).toISOString() } : {}),
-	...(data.heroImage ? { image: new URL(mediaUrl(data.heroImage, mediaSite), mediaSite).href } : {}),
-	mainEntityOfPage: new URL(`/blog/${data._sys.filename}/`, mediaSite).href,
-	...(author?.name
-		? {
-				author: {
-					'@type': 'Person',
-					name: author.name,
-					...(authorSlug ? { url: new URL(`/about/${authorSlug}/`, mediaSite).href } : {}),
-				},
-			}
-		: {}),
-	publisher: {
-		'@type': 'RealEstateAgent',
-		...(Astro.site ? { '@id': `${Astro.site.href}#team` } : {}),
-		...(config?.seo?.title ? { name: config.seo.title } : {}),
-	},
-};
+const blogJsonLd = data && buildBlogPostingJsonLd({
+	title: data.title,
+	description: data.description,
+	pubDate: data.pubDate,
+	updatedDate: data.updatedDate,
+	filename: data._sys.filename,
+	imageUrl: data.heroImage ? new URL(mediaUrl(data.heroImage, mediaSite), mediaSite).href : null,
+	author,
+	siteUrl: mediaSite,
+	canonicalSite: Astro.site?.href,
+	publisherName: config?.seo?.title,
+});
 ---
 {data && (
 	<>
-		{blogJsonLd && <script type="application/ld+json" is:inline set:html={JSON.stringify(blogJsonLd).replace(/</g, '\\u003c')} />}
+		{blogJsonLd && <script type="application/ld+json" is:inline set:html={serializeJsonLd(blogJsonLd)} />}
 		<section class="pt-10 md:pt-14">
 			<div class="mx-auto max-w-[1200px] px-6 md:px-12">
 				<nav aria-label="Breadcrumb" class="flex flex-wrap items-center gap-2 text-[13px] text-muted-foreground">
