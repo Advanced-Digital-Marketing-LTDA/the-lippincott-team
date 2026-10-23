@@ -50,6 +50,20 @@ for (const [source, destination] of redirects) {
 	});
 }
 
+test('legacy WordPress image URL emits one HTTP 301 and reaches the replacement asset', async () => {
+	const source = '/wp-content/uploads/2026/04/townelake2.jpg';
+	const destination = '/uploads/2026/04/townelake2.jpg';
+	for (const method of ['GET', 'HEAD']) {
+		const response = await fetch(new URL(source, base), { method, redirect: 'manual' });
+		assert.equal(response.status, 301, `${method} ${source}`);
+		assert.equal(response.headers.get('location'), destination);
+		const target = await fetch(new URL(response.headers.get('location'), base), { method, redirect: 'manual' });
+		assert.equal(target.status, 200, 'Replacement asset must be served without another redirect');
+		assert.equal(target.headers.get('location'), null);
+		assert.match(target.headers.get('content-type') ?? '', /^image\/jpeg\b/i);
+	}
+});
+
 test('unrelated paths and unresolved property URLs keep their 404 responses', async () => {
 	const paths = [
 		'/agents/', '/agents/other-agent/', '/agents/amy-lippincott/extra/',

@@ -63,3 +63,10 @@ for (const { source, destination, file } of redirects) {
 		assert.deepEqual(rules, [[source, destination, '301']]);
 	});
 }
+
+test('/wp-content/uploads/2026/04/townelake2.jpg has a matching exact permanent Netlify rule', () => {
+	const source = '/wp-content/uploads/2026/04/townelake2.jpg';
+	const destination = '/uploads/2026/04/townelake2.jpg';
+	const rules = netlifyRules.filter(([from]) => from === source);
+	assert.deepEqual(rules, [[source, destination, '301']]);
+});

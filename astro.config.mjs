@@ -91,6 +91,8 @@ export default defineConfig({
 		// host-neutral redirect endpoints under src/pages/<prefix>/[...slug].ts
 		// (mirrored in public/_redirects, which Netlify's CDN reads directly).
 		'/team-member-page-design/': { status: 301, destination: '/about/' },
+		// Legacy WordPress image path; the asset now lives in Astro's public/uploads directory.
+		'/wp-content/uploads/2026/04/townelake2.jpg': { status: 301, destination: '/uploads/2026/04/townelake2.jpg' },
 		// Cimarron community guide was unpublished (the team does not sell
 		// there); send the old URL to the Katy guide so indexed links do not 404.
 		'/northwest-houston-real-estate/katy-tx-real-estate/cimarron-real-estate/': { status: 301, destination: '/northwest-houston-real-estate/katy-tx-real-estate/' },
