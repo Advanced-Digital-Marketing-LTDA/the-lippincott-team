@@ -39,7 +39,7 @@
   "dependencies": {
     "@astrojs/cloudflare": "^14.1.4",
     "@astrojs/mdx": "^7.0.3",
-    "@astrojs/netlify": "^8.1.2",
+    "@astrojs/netlify": "^8.2.4",
     "@astrojs/node": "^11.1.6",
     "@astrojs/rss": "4.0.19",
     "@astrojs/sitemap": "^3.7.3",
@@ -60,11 +60,11 @@
     "tailwind-merge": "^3.6.0",
     "tailwind-variants": "^3.2.2",
     "tailwindcss": "^4.3.0",
-    "tinacms": "^3.12.0"
+    "tinacms": "^3.14.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
-    "@tinacms/cli": "^2.6.0",
+    "@tinacms/cli": "^3.0.0",
     "@types/node": "^25.9.1",
     "@types/turndown": "^5.0.6",
     "node-html-parser": "^9.0.0",
