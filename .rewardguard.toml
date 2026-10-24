@@ -11,3 +11,8 @@ effort = "low"
 [content]
 enabled = true
 
+
+# Existing repository contracts; evidence remains scoped to its actual target/revision.
+[content.context]
+I = ["src/content/config/config.json"]
+S = ["docs/audits/lip-65-har-claim-ledger.md"]
