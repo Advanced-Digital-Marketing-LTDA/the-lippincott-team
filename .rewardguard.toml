@@ -16,3 +16,4 @@ enabled = true
 [content.context]
 I = ["src/content/config/config.json"]
 S = ["docs/audits/lip-65-har-claim-ledger.md"]
+B = ["PRODUCT.md"]
