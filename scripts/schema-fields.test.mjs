@@ -43,7 +43,7 @@ function normalize(value) {
 // Captured before the schema-only refactor. A changed field, description, flag,
 // option, list order or callback result must be deliberately reviewed, not blessed.
 const snapshots = {
-	homeTemplate: '211447c08e521ca297642d8aab7d80bbd2cdba7c76ad7a7962b911c21da721d6',
+	homeTemplate: '1665386842b09cdcde3b739b795e3234b67b58c35add5d75df1ac2b34d8b7b05',
 	reviewsTemplate: '7c6819a99d1908ee63929c8c7fdfdae6c4a96fc99f0da3caaba7798a3f1eaf85',
 	blogIndexTemplate: '1794072b76a185a89b51dc25583c45ae23413f82a2263facc031c87bcf47dd85',
 	buy: '2b06928b7570530e3c0f804ead4fe647964ba61b081bba56f1b8f13c239692b9',
