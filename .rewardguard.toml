@@ -17,3 +17,17 @@ enabled = true
 I = ["src/content/config/config.json"]
 S = ["docs/audits/lip-65-har-claim-ledger.md"]
 B = ["PRODUCT.md"]
+
+# Keep RewardGuard's default exclusions (this list replaces them) and skip generated files.
+# tina/tina-lock.json is one ~900 KB line rewritten on every Tina schema change; it exceeds
+# the judge's state budget and is checked by the tina-lock CI instead.
+[paths]
+exclude = [
+	"**/node_modules/**",
+	"**/dist/**",
+	"**/build/**",
+	"**/coverage/**",
+	"**/*.min.js",
+	"**/{package-lock.json,yarn.lock,pnpm-lock.yaml}",
+	"tina/tina-lock.json",
+]
