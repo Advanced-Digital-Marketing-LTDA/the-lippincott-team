@@ -3,14 +3,59 @@ import TinaMarkdown from '@tinacms/astro/TinaMarkdown.astro';
 import Section from '../ui/Section.astro';
 import { tinaField } from '@tinacms/astro/tina-field';
 import { mdxComponents } from '../mdx/components';
+import AboutIntroLink from '../mdx/AboutIntroLink.astro';
 import type { ContentBlock } from '../../lib/data';
 
-interface Props { data: Omit<ContentBlock, '__typename'> }
+interface Props {
+	data: Omit<ContentBlock, '__typename'>;
+	aboutIntro?: boolean;
+}
 
-const { data } = Astro.props;
+const { data, aboutIntro = false } = Astro.props;
+const aboutIntroComponents = { ...mdxComponents, a: AboutIntroLink };
 ---
-<Section class="prose prose-lg max-w-none">
-	<div class="mx-auto max-w-[720px]" data-tina-field={tinaField(data, 'body')}>
-		<TinaMarkdown content={data.body} components={mdxComponents} />
+
+<Section
+	background={aboutIntro ? 'bg-section' : 'bg-default'}
+	class={aboutIntro ? 'max-w-[1200px] px-6 md:px-12' : 'prose prose-lg max-w-none'}
+>
+	<div
+		class:list={['mx-auto', aboutIntro ? 'max-w-[860px] about-intro-copy' : 'max-w-[720px]']}
+		data-tina-field={tinaField(data, 'body')}
+	>
+		<TinaMarkdown content={data.body} components={aboutIntro ? aboutIntroComponents : mdxComponents} />
 	</div>
 </Section>
+
+<style>
+	.about-intro-copy {
+		max-width: min(100%, 68ch);
+		color: var(--body);
+		font-size: clamp(15px, 1.1vw, 16px);
+		line-height: 1.8;
+	}
+
+	.about-intro-copy :global(p) {
+		margin: 0;
+	}
+
+	.about-intro-copy :global(a) {
+		color: var(--primary);
+		font-weight: 600;
+		text-decoration: none;
+		border-bottom: 1px solid color-mix(in srgb, var(--primary) 40%, transparent);
+		padding-bottom: 0.08em;
+		transition: color 0.2s ease, border-color 0.2s ease;
+	}
+
+	.about-intro-copy :global(a:hover) {
+		color: #b4232c;
+		border-color: currentColor;
+	}
+
+	.about-intro-copy :global(a:focus-visible) {
+		outline: 2px solid var(--primary);
+		outline-offset: 3px;
+		border-radius: 2px;
+	}
+</style>

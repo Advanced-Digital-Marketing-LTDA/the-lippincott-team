@@ -1,0 +1,13 @@
+---
+import { sanitizeHref } from '@tinacms/astro/sanitize';
+import { mediaUrl } from '../../lib/media';
+import { safeHref } from '../../lib/url';
+
+interface Props { url: string }
+const { url } = Astro.props;
+// Tina's sanitizer rewrites tel: links to `#`. Keep this exception local to
+// the About introduction, using the site's existing URL protocol allowlist.
+const sanitizedHref = /^tel:/i.test(url.trim()) ? safeHref(url) : sanitizeHref(url);
+const href = mediaUrl(sanitizedHref, Astro.site?.href ?? Astro.url.origin);
+---
+<a href={href}><slot /></a>
