@@ -363,7 +363,7 @@ const contactPhone = config?.contact?.phone ?? null;
 					{(awards.trophies ?? []).filter((t) => t !== null).map((trophy) => (
 						<article class:list={['trophy reveal', { featured: trophy.featured }]} data-tina-field={tinaField(trophy)}>
 							<div class="org">{trophy.org}</div>
-							<h3>{trophy.title}</h3>
+							<h3>{trophy.link ? <a href={trophy.link} target="_blank" rel="noopener">{trophy.title}</a> : trophy.title}</h3>
 							<p>{trophy.body}</p>
 							{(trophy.years ?? []).filter((y) => y !== null).length > 0 && (
 								<div class="years">{(trophy.years ?? []).map((y) => <span>{y}</span>)}</div>

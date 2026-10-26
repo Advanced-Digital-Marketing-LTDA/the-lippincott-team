@@ -217,6 +217,7 @@ export const homeTemplate: Template = {
 				objectListField('trophies', 'Trophies', [
 					textField('org', 'Organization'),
 					...titleBodyFields(),
+					textField('link', 'Source Link', { description: 'Optional source URL. When set, the title links to it (opens in a new tab).' }),
 					textField('years', 'Year Chips', { list: true, description: 'Optional year chips, e.g. 2017.' }),
 					{ type: 'boolean', name: 'featured', label: 'Featured Style' },
 				]),
