@@ -22,6 +22,7 @@ Claims below are transcribed from the named HAR period. No unverified sale-to-li
 
 ## Excluded or unresolved source claims
 
+- The [Cypress community page](https://thelippincottteam.com/northwest-houston-real-estate/cypress-tx-real-estate/) cost-of-living block displays a $2,490 monthly median asking rent with source text “HAR.com · Sep 2026 city rentals” (checked against the public page on October 27, 2026). The [HAR Cypress trend page](https://www.har.com/cypress/realestate/pricetrends) shows a September 2026 row with $2,490 median price, 532 listings, and DOM 32. The extracted table does not establish whether the price is for asking rent or completed leases, whether it is monthly, the selected property-type filter, or the exact population and boundary. The page tile has a source label but no direct HAR link. This figure is absent from the approved eleven-row ledger; keep it unresolved until its metric, unit, population, property scope, and boundary are confirmed.
 - The HAR report shows pending-sales change of -3.5%, but the tile's single-family versus all-property scope was not identified. The homepage tile was removed.
 - No HAR replacement was verified for Realtor.com sale-to-list ratios, Texas-wide price-cut counts/rates, or the Cypress sale-to-list ratio. These claims were removed from the affected pages.
 - City active/sold statistics are not combined into ratios or like-for-like comparisons. City filter and boundary uncertainty remains linked to LIP-15, issue 387, comment 14802.
