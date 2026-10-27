@@ -41,6 +41,10 @@ interface Props {
 
 const { data } = Astro.props;
 const blocks = (data?.blocks ?? []).filter(b => b !== null);
+const isAboutPage = data?.__typename === 'Page' && data._sys.filename === 'about';
+const stackBridgelandCtaActions =
+	data?.__typename === 'Community' &&
+	data._sys.breadcrumbs.join('/') === 'northwest-houston-real-estate/cypress-tx-real-estate/bridgeland-real-estate';
 // The downloadable community guides (e.g. guide-to-cypress.docx) are only
 // linked inside the bottom guideCta block. Surface a binding-free duplicate
 // of that download action in a prominent band right under the hero on the
@@ -72,7 +76,7 @@ const listingUrl = data && 'listingUrl' in data ? data.listingUrl : null;
 			case 'Callout': return <Callout data={block as never} />;
 			case 'CommunityGrid': return <CommunityGrid data={block as never} />;
 			case 'ContactForm': return <ContactForm data={block as never} />;
-			case 'Content': return <Content data={block as never} />;
+			case 'Content': return <Content data={block as never} aboutIntro={isAboutPage} />;
 			case 'Cta': return <Cta data={block as never} />;
 			case 'Faq': return <Faq data={block as never} />;
 			case 'Features': return <Features data={block as never} />;
@@ -98,7 +102,7 @@ const listingUrl = data && 'listingUrl' in data ? data.listingUrl : null;
 			case 'NotePanel': return <NotePanel data={block as never} />;
 			case 'ProofStage': return <ProofStage data={block as never} />;
 			case 'RelatedChips': return <RelatedChips data={block as never} />;
-			case 'GuideCta': return <GuideCta data={block as never} />;
+			case 'GuideCta': return <GuideCta data={block as never} stackActions={stackBridgelandCtaActions} />;
 			case 'ChecklistSplit': return <ChecklistSplit data={block as never} />;
 			case 'StepsSplit': return <StepsSplit data={block as never} />;
 		}

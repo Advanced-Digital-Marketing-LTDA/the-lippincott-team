@@ -55,14 +55,15 @@ for (const mode of ['full-site', 'media-only']) {
     }
   });
   test(`${mode}: rich-text overrides retain Tina sanitization and resolve owned URLs`, () => {
-    for (const [file, attribute, sanitizer] of [['MediaImage', 'src', sanitizeImageSrc], ['MediaLink', 'href', sanitizeHref]]) {
+    for (const [file, attribute, sanitizer] of [['MediaImage', 'src', sanitizeImageSrc], ['MediaLink', 'href', sanitizeHref], ['AboutIntroLink', 'href', sanitizeHref]]) {
       let source;
       try { source = read(`components/mdx/${file}.astro`); } catch { assert.fail(`${file} override missing`); }
       const frontmatter = stripTypeScriptTypes(source.split('---')[1].replace(/^import .+;$/gm, ''));
       const expression = source.match(new RegExp(`${attribute}=\\{([^}]+)\\}`))[1];
-      for (const url of [path, 'https://assets.tina.io/uploads/preview.png', 'javascript:alert(1)', '//evil.test/a', 'data:image/svg+xml,evil']) {
-        const actual = runInNewContext(`${frontmatter}\n${expression}`, { Astro: { props: { url }, site: new URL(site), url: new URL(site) }, mediaUrl, sanitizeHref, sanitizeImageSrc });
-        assert.equal(actual, mediaUrl(sanitizer(url)));
+      for (const url of [path, 'https://assets.tina.io/uploads/preview.png', 'tel:+17134941818', 'javascript:alert(1)', '//evil.test/a', 'data:image/svg+xml,evil']) {
+        const actual = runInNewContext(`${frontmatter}\n${expression}`, { Astro: { props: { url }, site: new URL(site), url: new URL(site) }, mediaUrl, safeHref, sanitizeHref, sanitizeImageSrc });
+        const expectedSanitized = file === 'AboutIntroLink' && /^tel:/i.test(url) ? safeHref(url) : sanitizer(url);
+        assert.equal(actual, mediaUrl(expectedSanitized));
       }
     }
   });
