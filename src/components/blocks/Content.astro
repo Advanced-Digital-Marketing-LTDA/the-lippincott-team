@@ -4,6 +4,7 @@ import Section from '../ui/Section.astro';
 import { tinaField } from '@tinacms/astro/tina-field';
 import { mdxComponents } from '../mdx/components';
 import AboutIntroLink from '../mdx/AboutIntroLink.astro';
+import AboutIntroBody from '../mdx/AboutIntroBody.astro';
 import type { ContentBlock } from '../../lib/data';
 
 interface Props {
@@ -17,44 +18,119 @@ const aboutIntroComponents = { ...mdxComponents, a: AboutIntroLink };
 
 <Section
 	background={aboutIntro ? 'bg-section' : 'bg-default'}
-	class={aboutIntro ? 'max-w-[1200px] px-6 md:px-12' : 'prose prose-lg max-w-none'}
+	class={aboutIntro ? 'max-w-[1200px] px-6 md:px-12 py-20 md:py-[140px]' : 'prose prose-lg max-w-none'}
 >
 	<div
-		class:list={['mx-auto', aboutIntro ? 'max-w-[860px] about-intro-copy' : 'max-w-[720px]']}
+		class:list={['mx-auto', aboutIntro ? 'about-intro-copy' : 'max-w-[720px]']}
 		data-tina-field={tinaField(data, 'body')}
 	>
-		<TinaMarkdown content={data.body} components={aboutIntro ? aboutIntroComponents : mdxComponents} />
+		{aboutIntro ? (
+			<AboutIntroBody><TinaMarkdown content={data.body} components={aboutIntroComponents} /></AboutIntroBody>
+		) : (
+			<TinaMarkdown content={data.body} components={mdxComponents} />
+		)}
 	</div>
 </Section>
 
 <style>
 	.about-intro-copy {
-		max-width: min(100%, 68ch);
+		display: grid;
+		grid-template-columns: 7fr 5fr;
 		color: var(--body);
-		font-size: clamp(15px, 1.1vw, 16px);
-		line-height: 1.8;
+		font-size: 15px;
+		line-height: 1.75;
 	}
 
 	.about-intro-copy :global(p) {
 		margin: 0;
 	}
 
-	.about-intro-copy :global(a) {
+	/* Lead: first paragraph spans both columns. */
+	.about-intro-copy :global(p:first-child) {
+		grid-column: 1 / -1;
+		max-width: 30em;
+		margin-bottom: 64px;
+		font-family: var(--font-serif);
+		font-size: 30px;
+		font-weight: 300;
+		line-height: 1.32;
+		letter-spacing: -0.01em;
+		color: var(--ink);
+		text-wrap: pretty;
+	}
+
+	.about-intro-copy :global(p:first-child em) {
+		font-style: italic;
 		color: var(--primary);
+	}
+
+	/* Ledger: the next two paragraphs sit side by side under a hairline. */
+	.about-intro-copy :global(p:nth-child(2)),
+	.about-intro-copy :global(p:nth-child(3)) {
+		border-top: 1px solid rgba(23, 21, 26, 0.1);
+	}
+
+	.about-intro-copy :global(p:nth-child(2)) {
+		padding: 40px max(56px, calc(100% - 34em)) 8px 0;
+	}
+
+	.about-intro-copy :global(p:nth-child(3)) {
+		padding: 40px 0 8px 56px;
+		border-left: 1px solid rgba(23, 21, 26, 0.1);
+		line-height: 1.85;
+	}
+
+	.about-intro-copy :global(strong) {
 		font-weight: 600;
-		text-decoration: none;
-		border-bottom: 1px solid color-mix(in srgb, var(--primary) 40%, transparent);
-		padding-bottom: 0.08em;
-		transition: color 0.2s ease, border-color 0.2s ease;
+		color: var(--ink);
+		font-variant-numeric: tabular-nums;
+		white-space: nowrap;
+	}
+
+	.about-intro-copy :global(.about-intro-plus) {
+		color: var(--primary);
+	}
+
+	@media (max-width: 760px) {
+		.about-intro-copy {
+			grid-template-columns: 1fr;
+		}
+
+		.about-intro-copy :global(p:first-child) {
+			font-size: 26px;
+		}
+
+		.about-intro-copy :global(p:nth-child(2)),
+		.about-intro-copy :global(p:nth-child(3)) {
+			padding: 32px 0 0 0;
+			border-left: 0;
+		}
+
+		.about-intro-copy :global(p:nth-child(3)) {
+			margin-top: 32px;
+		}
+	}
+
+	.about-intro-copy :global(a) {
+		color: #b4232c;
+		font-size: 17px;
+		font-weight: 600;
+		white-space: nowrap;
+		text-decoration: underline;
+		text-underline-offset: 5px;
+		text-decoration-thickness: 2px;
 	}
 
 	.about-intro-copy :global(a:hover) {
-		color: #b4232c;
-		border-color: currentColor;
+		color: #b02831;
+	}
+
+	.about-intro-copy :global(p:last-child a:last-child)::after {
+		content: ' →' / '';
 	}
 
 	.about-intro-copy :global(a:focus-visible) {
-		outline: 2px solid var(--primary);
+		outline: 2px solid var(--ink);
 		outline-offset: 3px;
 		border-radius: 2px;
 	}
