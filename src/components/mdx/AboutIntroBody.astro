@@ -1,0 +1,12 @@
+---
+// Tina renders bold/italic text without a component hook and pads inline tags
+// with whitespace (which shows as a gap before punctuation, e.g. "Texas ,").
+// The About intro trims that padding here and wraps a trailing "+" in bold
+// figures (e.g. **1,463+**) so it can take the accent colour.
+const html = await Astro.slots.render('default');
+const marked = html
+	.replace(/<(strong|em|a\b[^>]*)>\s+/g, '<$1>')
+	.replace(/\s+<\/(strong|em|a)>/g, '</$1>')
+	.replace(/(<strong>[^<]*?)\+<\/strong>/g, '$1<span class="about-intro-plus">+</span></strong>');
+---
+<Fragment set:html={marked} />
