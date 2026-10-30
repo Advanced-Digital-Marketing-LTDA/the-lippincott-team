@@ -6,7 +6,7 @@ type Props = {
 
 import { randomUUID } from 'node:crypto';
 
-const { variant = 'full', fullPageHref = '/seller-net-proceeds-calculator/' } = Astro.props;
+const { variant = 'full', fullPageHref = '/sell/seller-net-proceeds-calculator/' } = Astro.props;
 const idPrefix = `seller-net-proceeds-${variant}-${randomUUID()}`;
 const detailedMoneyFields = [
 	{ key: 'detailedClosingCosts.titleEscrow', label: 'Seller-paid title and escrow' },
@@ -53,13 +53,13 @@ const detailedMoneyFields = [
 						<div class="snp-panel-heading">
 							<p class="snp-eyebrow">Your estimate</p>
 							<h2 id={`${idPrefix}-inputs-title`}>Sale and loan payoffs</h2>
-							<p>Amounts are in U.S. dollars, up to $1,000,000,000,000.00. Blank fields are excluded; enter $0 when you know a cost does not apply.</p>
+							<p>Amounts are in U.S. dollars, up to $5,000,000.00. Blank fields are excluded; enter $0 when you know a cost does not apply.</p>
 						</div>
 
 						<div class="snp-fields">
 							<div class="snp-field" data-field-wrap="salePrice">
 								<label for={`${idPrefix}-sale-price`}>Expected sale price <span class="snp-required">Required</span></label>
-								<span class="snp-field-note" id={`${idPrefix}-sale-price-hint`}>Enter a positive amount, up to $1,000,000,000,000.00.</span>
+								<span class="snp-field-note" id={`${idPrefix}-sale-price-hint`}>Enter a positive amount, up to $5,000,000.00.</span>
 								<input id={`${idPrefix}-sale-price`} data-field="salePrice" data-base-describedby={`${idPrefix}-sale-price-hint`} aria-describedby={`${idPrefix}-sale-price-hint`} type="text" inputmode="decimal" autocomplete="off" spellcheck="false" required />
 								<span class="snp-error" data-error-for="salePrice" id={`${idPrefix}-sale-price-error`}></span>
 							</div>
@@ -72,7 +72,7 @@ const detailedMoneyFields = [
 									<input id={`${idPrefix}-first-payoff`} data-field="payoffs.firstMortgage" data-base-describedby={`${idPrefix}-payoff-hint`} aria-describedby={`${idPrefix}-payoff-hint`} type="text" inputmode="decimal" autocomplete="off" spellcheck="false" />
 									<span class="snp-error" data-error-for="payoffs.firstMortgage" id={`${idPrefix}-first-payoff-error`}></span>
 								</div>
-								<span class="snp-visually-hidden" id={`${idPrefix}-payoff-hint`}>Enter a nonnegative dollar amount, up to $1,000,000,000,000.00.</span>
+								<span class="snp-visually-hidden" id={`${idPrefix}-payoff-hint`}>Enter a nonnegative dollar amount, up to $5,000,000.00.</span>
 								<div class="snp-additional-payoffs" data-payoff-list></div>
 								<button class="snp-secondary-button" type="button" data-add-payoff>Add another mortgage or HELOC</button>
 							</fieldset>
@@ -97,7 +97,7 @@ const detailedMoneyFields = [
 										<label for={`${idPrefix}-aggregate-costs`}>Estimated total closing costs</label>
 										<span class="snp-field-note">Enter your own estimate; no rate or fee is assumed.</span>
 										<input id={`${idPrefix}-aggregate-costs`} data-field="aggregateClosingCosts" data-base-describedby={`${idPrefix}-aggregate-hint`} aria-describedby={`${idPrefix}-aggregate-hint`} type="text" inputmode="decimal" autocomplete="off" spellcheck="false" />
-										<span class="snp-visually-hidden" id={`${idPrefix}-aggregate-hint`}>Enter a nonnegative dollar amount, up to $1,000,000,000,000.00.</span>
+										<span class="snp-visually-hidden" id={`${idPrefix}-aggregate-hint`}>Enter a nonnegative dollar amount, up to $5,000,000.00.</span>
 										<span class="snp-error" data-error-for="aggregateClosingCosts" id={`${idPrefix}-aggregate-costs-error`}></span>
 									</div>
 								</fieldset>
@@ -113,7 +113,7 @@ const detailedMoneyFields = [
 										<div class="snp-field" data-comp-value-wrap="dollars">
 											<label class="snp-visually-hidden" for={`${idPrefix}-listing-dollar-value`}>Listing-side compensation in dollars</label>
 											<input id={`${idPrefix}-listing-dollar-value`} data-field="detailedClosingCosts.listingCompensation.value" data-comp-value="dollars" data-base-describedby={`${idPrefix}-listing-dollar-hint`} aria-describedby={`${idPrefix}-listing-dollar-hint`} type="text" inputmode="decimal" autocomplete="off" spellcheck="false" />
-											<span class="snp-visually-hidden" id={`${idPrefix}-listing-dollar-hint`}>Enter a nonnegative dollar amount, up to $1,000,000,000,000.00.</span>
+											<span class="snp-visually-hidden" id={`${idPrefix}-listing-dollar-hint`}>Enter a nonnegative dollar amount, up to $5,000,000.00.</span>
 										</div>
 										<div class="snp-field" data-comp-value-wrap="percent" hidden>
 											<label class="snp-visually-hidden" for={`${idPrefix}-listing-percent-value`}>Listing-side compensation as percent of sale price</label>
@@ -132,7 +132,7 @@ const detailedMoneyFields = [
 										<div class="snp-field" data-comp-value-wrap="dollars">
 											<label class="snp-visually-hidden" for={`${idPrefix}-buyer-dollar-value`}>Buyer-agent compensation in dollars</label>
 											<input id={`${idPrefix}-buyer-dollar-value`} data-field="detailedClosingCosts.buyerAgentCompensation.value" data-comp-value="dollars" data-base-describedby={`${idPrefix}-buyer-dollar-hint`} aria-describedby={`${idPrefix}-buyer-dollar-hint`} type="text" inputmode="decimal" autocomplete="off" spellcheck="false" />
-											<span class="snp-visually-hidden" id={`${idPrefix}-buyer-dollar-hint`}>Enter a nonnegative dollar amount, up to $1,000,000,000,000.00.</span>
+											<span class="snp-visually-hidden" id={`${idPrefix}-buyer-dollar-hint`}>Enter a nonnegative dollar amount, up to $5,000,000.00.</span>
 										</div>
 										<div class="snp-field" data-comp-value-wrap="percent" hidden>
 											<label class="snp-visually-hidden" for={`${idPrefix}-buyer-percent-value`}>Buyer-agent compensation as percent of sale price</label>
@@ -146,7 +146,7 @@ const detailedMoneyFields = [
 										<div class="snp-field" data-field-wrap={field.key}>
 											<label for={`${idPrefix}-${field.key.split('.').at(-1)}`}>{field.label}</label>
 											<input id={`${idPrefix}-${field.key.split('.').at(-1)}`} data-field={field.key} data-base-describedby={`${idPrefix}-${field.key.split('.').at(-1)}-hint`} aria-describedby={`${idPrefix}-${field.key.split('.').at(-1)}-hint`} type="text" inputmode="decimal" autocomplete="off" spellcheck="false" />
-											<span class="snp-visually-hidden" id={`${idPrefix}-${field.key.split('.').at(-1)}-hint`}>Enter a nonnegative dollar amount, up to $1,000,000,000,000.00.</span>
+											<span class="snp-visually-hidden" id={`${idPrefix}-${field.key.split('.').at(-1)}-hint`}>Enter a nonnegative dollar amount, up to $5,000,000.00.</span>
 											<span class="snp-error" data-error-for={field.key} id={`${idPrefix}-${field.key.split('.').at(-1)}-error`}></span>
 										</div>
 									))}
@@ -171,7 +171,7 @@ const detailedMoneyFields = [
 									<input id={`${idPrefix}-carrying`} data-field="otherExpenses.carrying" data-base-describedby={`${idPrefix}-other-hint`} aria-describedby={`${idPrefix}-other-hint`} type="text" inputmode="decimal" autocomplete="off" spellcheck="false" />
 									<span class="snp-error" data-error-for="otherExpenses.carrying" id={`${idPrefix}-carrying-error`}></span>
 								</div>
-								<span class="snp-visually-hidden" id={`${idPrefix}-other-hint`}>Enter a nonnegative dollar amount, up to $1,000,000,000,000.00.</span>
+								<span class="snp-visually-hidden" id={`${idPrefix}-other-hint`}>Enter a nonnegative dollar amount, up to $5,000,000.00.</span>
 							</fieldset>
 						</div>
 

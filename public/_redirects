@@ -18,6 +18,9 @@
 # WordPress author archives (all posts are by the team).
 /author/*  /about/  301
 
+# Keep the previous calculator URL pointing to its location under Sellers.
+/seller-net-proceeds-calculator/  /sell/seller-net-proceeds-calculator/  301
+
 # Legacy buyer/seller section URLs now live at /buy/ and /sell/.
 /buyers/*  /buy/  301
 /sellers/*  /sell/  301
