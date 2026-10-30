@@ -4,8 +4,10 @@ type Props = {
 	fullPageHref?: string;
 };
 
+import { randomUUID } from 'node:crypto';
+
 const { variant = 'full', fullPageHref = '/seller-net-proceeds-calculator/' } = Astro.props;
-const idPrefix = `seller-net-proceeds-${variant}-${Astro.url.pathname.replace(/[^a-z0-9]+/gi, '-')}`;
+const idPrefix = `seller-net-proceeds-${variant}-${randomUUID()}`;
 const detailedMoneyFields = [
 	{ key: 'detailedClosingCosts.titleEscrow', label: 'Seller-paid title and escrow' },
 	{ key: 'detailedClosingCosts.propertyTaxHoaSettlement', label: 'Property-tax and HOA settlement' },
@@ -29,7 +31,7 @@ const detailedMoneyFields = [
 		<header class="snp-compact-header">
 			<p class="snp-compact-brand">The Lippincott Team</p>
 			<h2>Seller net proceeds</h2>
-			<p>Build a private, on-page estimate from the numbers you know.</p>
+			<p>Build an estimate from the amounts you know.</p>
 		</header>
 	)}
 
@@ -95,6 +97,7 @@ const detailedMoneyFields = [
 										<label for={`${idPrefix}-aggregate-costs`}>Estimated total closing costs</label>
 										<span class="snp-field-note">Enter your own estimate; no rate or fee is assumed.</span>
 										<input id={`${idPrefix}-aggregate-costs`} data-field="aggregateClosingCosts" data-base-describedby={`${idPrefix}-aggregate-hint`} aria-describedby={`${idPrefix}-aggregate-hint`} type="text" inputmode="decimal" autocomplete="off" spellcheck="false" />
+										<span class="snp-visually-hidden" id={`${idPrefix}-aggregate-hint`}>Enter a nonnegative dollar amount, up to $1,000,000,000,000.00.</span>
 										<span class="snp-error" data-error-for="aggregateClosingCosts" id={`${idPrefix}-aggregate-costs-error`}></span>
 									</div>
 								</fieldset>
@@ -263,7 +266,12 @@ const detailedMoneyFields = [
 			const setLive = (message: string) => {
 				if (!liveRegion) return;
 				if (liveTimer) clearTimeout(liveTimer);
-				liveTimer = setTimeout(() => { liveRegion.textContent = message; }, 450);
+				liveTimer = setTimeout(() => { liveRegion.textContent = message; liveTimer = undefined; }, 450);
+			};
+			const cancelPendingLive = () => {
+				if (liveTimer) clearTimeout(liveTimer);
+				liveTimer = undefined;
+				if (liveRegion) liveRegion.textContent = '';
 			};
 
 			const resetErrors = () => {
@@ -438,6 +446,7 @@ const detailedMoneyFields = [
 				const salePrice = parseCurrencyCents(input.salePrice);
 				const outcome = calculateSellerNetProceeds(input);
 				if (salePrice.kind === 'blank') {
+					cancelPendingLive();
 					if (!outcome.ok) {
 						Object.entries(outcome.errors).filter(([key]) => key !== 'salePrice').forEach(([key, message]) => setFieldError(key, message));
 					}
@@ -451,6 +460,7 @@ const detailedMoneyFields = [
 				}
 
 				if (!outcome.ok) {
+					cancelPendingLive();
 					Object.entries(outcome.errors).forEach(([key, message]) => setFieldError(key, message));
 					if (resultPrompt) resultPrompt.hidden = true;
 					if (resultInvalid) resultInvalid.hidden = false;
@@ -559,7 +569,7 @@ const detailedMoneyFields = [
 	.snp-secondary-button:hover,.snp-remove-payoff:hover{border-color:var(--snp-red-deep);color:var(--snp-red-deep)}
 	.snp-secondary-button:disabled{cursor:not-allowed;opacity:.55}
 	.snp-privacy-note{margin:30px 0 0;padding-top:20px;border-top:1px solid var(--snp-line);color:var(--snp-muted);font-size:11.5px;line-height:1.6}
-	.snp-result-panel{background:#fcfaf6}
+	.snp-result-panel{container-type:inline-size;background:#fcfaf6}
 	.snp-result-heading{margin-bottom:22px}
 	.snp-result-prompt,.snp-result-invalid{padding:22px 20px;border:1px solid var(--snp-line);border-radius:14px;background:var(--snp-paper)}
 	.snp-result-prompt h3,.snp-result-invalid h3,.snp-omissions h3{margin:0;color:var(--snp-ink);font-family:'Fraunces Variable','Fraunces',Georgia,serif;font-size:22px;font-weight:400;line-height:1.2}
@@ -588,7 +598,7 @@ const detailedMoneyFields = [
 	.snp-contact-band .snp-contact-inner>div>p:last-child{margin:17px 0 0;color:var(--snp-muted);font-size:15px;line-height:1.65}
 	.home-v2 .snp-contact-button{display:inline-flex;min-height:50px;flex:0 0 auto;align-items:center;justify-content:center;gap:10px;padding:14px 23px;border-radius:999px;background:var(--snp-red);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:background .2s ease}
 	.home-v2 .snp-contact-button:hover{background:var(--snp-red-deep)}
-	.snp-compact{max-width:880px;margin-inline:auto;padding:12px}
+	.snp-compact{max-width:880px;margin-inline:auto;padding:12px;container-type:inline-size}
 	.snp-compact .snp-wrap{width:100%;max-width:880px}
 	.snp-compact .snp-calculator-section{padding:0;background:transparent}
 	.snp-compact .snp-calculator-shell{border-radius:18px}
@@ -627,6 +637,18 @@ const detailedMoneyFields = [
 		.snp-remove-payoff{justify-self:start}
 		.snp-radio-row{gap:8px}
 		.snp-radio{padding:9px 12px;font-size:12px}
+	}
+	@media(max-width:480px){
+		.snp-ledger-row{align-items:flex-start;flex-direction:column;gap:3px}
+		.snp-ledger-label,.snp-ledger-value{max-width:100%;text-align:left;white-space:normal;overflow-wrap:anywhere}
+	}
+	@container (max-width:400px){
+		.snp-ledger-row{align-items:flex-start;flex-direction:column;gap:3px}
+		.snp-ledger-label,.snp-ledger-value{max-width:100%;text-align:left;white-space:normal;overflow-wrap:anywhere}
+	}
+	@container (max-width:640px){
+		.snp-compact .snp-calculator-layout{grid-template-columns:minmax(0,1fr)}
+		.snp-compact .snp-input-panel{border-right:0;border-bottom:1px solid var(--snp-line)}
 	}
 	@media(prefers-reduced-motion:reduce){
 		.snp-root *, .snp-root *::before, .snp-root *::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}
