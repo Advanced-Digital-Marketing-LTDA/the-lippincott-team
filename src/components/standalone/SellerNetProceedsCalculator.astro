@@ -1,0 +1,634 @@
+---
+type Props = {
+	variant?: 'full' | 'compact';
+	fullPageHref?: string;
+};
+
+const { variant = 'full', fullPageHref = '/seller-net-proceeds-calculator/' } = Astro.props;
+const idPrefix = `seller-net-proceeds-${variant}-${Astro.url.pathname.replace(/[^a-z0-9]+/gi, '-')}`;
+const detailedMoneyFields = [
+	{ key: 'detailedClosingCosts.titleEscrow', label: 'Seller-paid title and escrow' },
+	{ key: 'detailedClosingCosts.propertyTaxHoaSettlement', label: 'Property-tax and HOA settlement' },
+	{ key: 'detailedClosingCosts.concessions', label: 'Concessions' },
+	{ key: 'detailedClosingCosts.repairsWarrantySurvey', label: 'Repairs, warranty, and survey' },
+	{ key: 'detailedClosingCosts.other', label: 'Other closing expenses' },
+] as const;
+---
+
+<div class={`home-v2 snp-root ${variant === 'compact' ? 'snp-compact' : 'snp-full'}`} data-snp-calculator data-snp-variant={variant} data-instance={idPrefix}>
+	{variant === 'full' ? (
+		<section class="snp-intro" aria-labelledby={`${idPrefix}-title`}>
+			<div class="snp-wrap">
+				<p class="snp-eyebrow">A clearer view of your sale</p>
+				<h1 id={`${idPrefix}-title`}>Seller net proceeds <em>calculator</em></h1>
+				<p class="snp-intro-copy">Estimate what may remain after mortgage payoffs, closing costs, and the expenses around your move. Enter only the figures you know; blank amounts stay out of the estimate.</p>
+				<p class="snp-intro-note">A planning estimate—not a final settlement statement or an appraisal.</p>
+			</div>
+		</section>
+	) : (
+		<header class="snp-compact-header">
+			<p class="snp-compact-brand">The Lippincott Team</p>
+			<h2>Seller net proceeds</h2>
+			<p>Build a private, on-page estimate from the numbers you know.</p>
+		</header>
+	)}
+
+	{variant === 'full' && (
+		<section class="snp-section-intro">
+			<div class="snp-wrap">
+				<p class="snp-eyebrow">Use your own estimates</p>
+				<h2>Add the numbers <em>you know.</em></h2>
+				<p>There are no preset commission rates or closing-cost assumptions. Enter a total or estimate the cost categories one by one.</p>
+			</div>
+		</section>
+	)}
+
+	<section class="snp-calculator-section" aria-label="Seller net proceeds calculator">
+		<div class="snp-wrap">
+			<div class="snp-calculator-shell">
+				<div class="snp-calculator-layout">
+					<section class="snp-input-panel" aria-labelledby={`${idPrefix}-inputs-title`}>
+						<div class="snp-panel-heading">
+							<p class="snp-eyebrow">Your estimate</p>
+							<h2 id={`${idPrefix}-inputs-title`}>Sale and loan payoffs</h2>
+							<p>Amounts are in U.S. dollars, up to $1,000,000,000,000.00. Blank fields are excluded; enter $0 when you know a cost does not apply.</p>
+						</div>
+
+						<div class="snp-fields">
+							<div class="snp-field" data-field-wrap="salePrice">
+								<label for={`${idPrefix}-sale-price`}>Expected sale price <span class="snp-required">Required</span></label>
+								<span class="snp-field-note" id={`${idPrefix}-sale-price-hint`}>Enter a positive amount, up to $1,000,000,000,000.00.</span>
+								<input id={`${idPrefix}-sale-price`} data-field="salePrice" data-base-describedby={`${idPrefix}-sale-price-hint`} aria-describedby={`${idPrefix}-sale-price-hint`} type="text" inputmode="decimal" autocomplete="off" spellcheck="false" required />
+								<span class="snp-error" data-error-for="salePrice" id={`${idPrefix}-sale-price-error`}></span>
+							</div>
+
+							<fieldset class="snp-fieldset snp-payoffs">
+								<legend>Mortgage and loan payoffs</legend>
+								<p class="snp-field-note">Use current estimated balances, including any mortgage or HELOC secured by the property.</p>
+								<div class="snp-field" data-field-wrap="payoffs.firstMortgage">
+									<label for={`${idPrefix}-first-payoff`}>First mortgage payoff</label>
+									<input id={`${idPrefix}-first-payoff`} data-field="payoffs.firstMortgage" data-base-describedby={`${idPrefix}-payoff-hint`} aria-describedby={`${idPrefix}-payoff-hint`} type="text" inputmode="decimal" autocomplete="off" spellcheck="false" />
+									<span class="snp-error" data-error-for="payoffs.firstMortgage" id={`${idPrefix}-first-payoff-error`}></span>
+								</div>
+								<span class="snp-visually-hidden" id={`${idPrefix}-payoff-hint`}>Enter a nonnegative dollar amount, up to $1,000,000,000,000.00.</span>
+								<div class="snp-additional-payoffs" data-payoff-list></div>
+								<button class="snp-secondary-button" type="button" data-add-payoff>Add another mortgage or HELOC</button>
+							</fieldset>
+
+							<fieldset class="snp-fieldset snp-cost-mode">
+								<legend>Closing-cost estimate</legend>
+								<p class="snp-field-note">Choose one method. Switching methods saves your entries, but only the selected method is included.</p>
+								<div class="snp-radio-row" role="group" aria-label="Closing-cost method">
+									<label class="snp-radio" for={`${idPrefix}-mode-aggregate`}>
+										<input id={`${idPrefix}-mode-aggregate`} type="radio" name={`${idPrefix}-closing-cost-mode`} value="aggregate" data-cost-mode checked />
+										<span>One total</span>
+									</label>
+									<label class="snp-radio" for={`${idPrefix}-mode-detailed`}>
+										<input id={`${idPrefix}-mode-detailed`} type="radio" name={`${idPrefix}-closing-cost-mode`} value="detailed" data-cost-mode />
+										<span>Itemize costs</span>
+									</label>
+								</div>
+
+								<fieldset class="snp-mode-panel" data-mode-panel="aggregate">
+									<legend class="snp-visually-hidden">One-total closing costs</legend>
+									<div class="snp-field" data-field-wrap="aggregateClosingCosts">
+										<label for={`${idPrefix}-aggregate-costs`}>Estimated total closing costs</label>
+										<span class="snp-field-note">Enter your own estimate; no rate or fee is assumed.</span>
+										<input id={`${idPrefix}-aggregate-costs`} data-field="aggregateClosingCosts" data-base-describedby={`${idPrefix}-aggregate-hint`} aria-describedby={`${idPrefix}-aggregate-hint`} type="text" inputmode="decimal" autocomplete="off" spellcheck="false" />
+										<span class="snp-error" data-error-for="aggregateClosingCosts" id={`${idPrefix}-aggregate-costs-error`}></span>
+									</div>
+								</fieldset>
+
+								<fieldset class="snp-mode-panel" data-mode-panel="detailed" hidden>
+									<legend class="snp-visually-hidden">Itemized closing costs</legend>
+									<div class="snp-field snp-compensation" data-compensation="listingCompensation">
+										<span class="snp-label">Listing-side compensation</span>
+										<div class="snp-mini-radios" role="group" aria-label="Listing-side compensation format">
+											<label for={`${idPrefix}-listing-dollars`}><input id={`${idPrefix}-listing-dollars`} type="radio" name={`${idPrefix}-listing-mode`} value="dollars" data-comp-mode checked /><span>Dollars</span></label>
+											<label for={`${idPrefix}-listing-percent`}><input id={`${idPrefix}-listing-percent`} type="radio" name={`${idPrefix}-listing-mode`} value="percent" data-comp-mode /><span>Percent of sale price</span></label>
+										</div>
+										<div class="snp-field" data-comp-value-wrap="dollars">
+											<label class="snp-visually-hidden" for={`${idPrefix}-listing-dollar-value`}>Listing-side compensation in dollars</label>
+											<input id={`${idPrefix}-listing-dollar-value`} data-field="detailedClosingCosts.listingCompensation.value" data-comp-value="dollars" data-base-describedby={`${idPrefix}-listing-dollar-hint`} aria-describedby={`${idPrefix}-listing-dollar-hint`} type="text" inputmode="decimal" autocomplete="off" spellcheck="false" />
+											<span class="snp-visually-hidden" id={`${idPrefix}-listing-dollar-hint`}>Enter a nonnegative dollar amount, up to $1,000,000,000,000.00.</span>
+										</div>
+										<div class="snp-field" data-comp-value-wrap="percent" hidden>
+											<label class="snp-visually-hidden" for={`${idPrefix}-listing-percent-value`}>Listing-side compensation as percent of sale price</label>
+											<input id={`${idPrefix}-listing-percent-value`} data-field="detailedClosingCosts.listingCompensation.value" data-comp-value="percent" data-base-describedby={`${idPrefix}-listing-percent-hint`} aria-describedby={`${idPrefix}-listing-percent-hint`} type="text" inputmode="decimal" autocomplete="off" spellcheck="false" />
+											<span class="snp-visually-hidden" id={`${idPrefix}-listing-percent-hint`}>Enter a percentage from 0 to 100. This is multiplied by the sale price.</span>
+										</div>
+										<span class="snp-error" data-error-for="detailedClosingCosts.listingCompensation.value" id={`${idPrefix}-listing-error`}></span>
+									</div>
+
+									<div class="snp-field snp-compensation" data-compensation="buyerAgentCompensation">
+										<span class="snp-label">Buyer-agent compensation paid by seller</span>
+										<div class="snp-mini-radios" role="group" aria-label="Buyer-agent compensation format">
+											<label for={`${idPrefix}-buyer-dollars`}><input id={`${idPrefix}-buyer-dollars`} type="radio" name={`${idPrefix}-buyer-mode`} value="dollars" data-comp-mode checked /><span>Dollars</span></label>
+											<label for={`${idPrefix}-buyer-percent`}><input id={`${idPrefix}-buyer-percent`} type="radio" name={`${idPrefix}-buyer-mode`} value="percent" data-comp-mode /><span>Percent of sale price</span></label>
+										</div>
+										<div class="snp-field" data-comp-value-wrap="dollars">
+											<label class="snp-visually-hidden" for={`${idPrefix}-buyer-dollar-value`}>Buyer-agent compensation in dollars</label>
+											<input id={`${idPrefix}-buyer-dollar-value`} data-field="detailedClosingCosts.buyerAgentCompensation.value" data-comp-value="dollars" data-base-describedby={`${idPrefix}-buyer-dollar-hint`} aria-describedby={`${idPrefix}-buyer-dollar-hint`} type="text" inputmode="decimal" autocomplete="off" spellcheck="false" />
+											<span class="snp-visually-hidden" id={`${idPrefix}-buyer-dollar-hint`}>Enter a nonnegative dollar amount, up to $1,000,000,000,000.00.</span>
+										</div>
+										<div class="snp-field" data-comp-value-wrap="percent" hidden>
+											<label class="snp-visually-hidden" for={`${idPrefix}-buyer-percent-value`}>Buyer-agent compensation as percent of sale price</label>
+											<input id={`${idPrefix}-buyer-percent-value`} data-field="detailedClosingCosts.buyerAgentCompensation.value" data-comp-value="percent" data-base-describedby={`${idPrefix}-buyer-percent-hint`} aria-describedby={`${idPrefix}-buyer-percent-hint`} type="text" inputmode="decimal" autocomplete="off" spellcheck="false" />
+											<span class="snp-visually-hidden" id={`${idPrefix}-buyer-percent-hint`}>Enter a percentage from 0 to 100. This is multiplied by the sale price.</span>
+										</div>
+										<span class="snp-error" data-error-for="detailedClosingCosts.buyerAgentCompensation.value" id={`${idPrefix}-buyer-error`}></span>
+									</div>
+
+									{detailedMoneyFields.map((field) => (
+										<div class="snp-field" data-field-wrap={field.key}>
+											<label for={`${idPrefix}-${field.key.split('.').at(-1)}`}>{field.label}</label>
+											<input id={`${idPrefix}-${field.key.split('.').at(-1)}`} data-field={field.key} data-base-describedby={`${idPrefix}-${field.key.split('.').at(-1)}-hint`} aria-describedby={`${idPrefix}-${field.key.split('.').at(-1)}-hint`} type="text" inputmode="decimal" autocomplete="off" spellcheck="false" />
+											<span class="snp-visually-hidden" id={`${idPrefix}-${field.key.split('.').at(-1)}-hint`}>Enter a nonnegative dollar amount, up to $1,000,000,000,000.00.</span>
+											<span class="snp-error" data-error-for={field.key} id={`${idPrefix}-${field.key.split('.').at(-1)}-error`}></span>
+										</div>
+									))}
+								</fieldset>
+							</fieldset>
+
+							<fieldset class="snp-fieldset snp-other-expenses">
+								<legend>Other expenses around your move</legend>
+								<p class="snp-field-note">These are shown separately from cash at closing.</p>
+								<div class="snp-field" data-field-wrap="otherExpenses.preparation">
+									<label for={`${idPrefix}-preparation`}>Preparation costs</label>
+									<input id={`${idPrefix}-preparation`} data-field="otherExpenses.preparation" data-base-describedby={`${idPrefix}-other-hint`} aria-describedby={`${idPrefix}-other-hint`} type="text" inputmode="decimal" autocomplete="off" spellcheck="false" />
+									<span class="snp-error" data-error-for="otherExpenses.preparation" id={`${idPrefix}-preparation-error`}></span>
+								</div>
+								<div class="snp-field" data-field-wrap="otherExpenses.moving">
+									<label for={`${idPrefix}-moving`}>Moving costs</label>
+									<input id={`${idPrefix}-moving`} data-field="otherExpenses.moving" data-base-describedby={`${idPrefix}-other-hint`} aria-describedby={`${idPrefix}-other-hint`} type="text" inputmode="decimal" autocomplete="off" spellcheck="false" />
+									<span class="snp-error" data-error-for="otherExpenses.moving" id={`${idPrefix}-moving-error`}></span>
+								</div>
+								<div class="snp-field" data-field-wrap="otherExpenses.carrying">
+									<label for={`${idPrefix}-carrying`}>Carrying costs</label>
+									<input id={`${idPrefix}-carrying`} data-field="otherExpenses.carrying" data-base-describedby={`${idPrefix}-other-hint`} aria-describedby={`${idPrefix}-other-hint`} type="text" inputmode="decimal" autocomplete="off" spellcheck="false" />
+									<span class="snp-error" data-error-for="otherExpenses.carrying" id={`${idPrefix}-carrying-error`}></span>
+								</div>
+								<span class="snp-visually-hidden" id={`${idPrefix}-other-hint`}>Enter a nonnegative dollar amount, up to $1,000,000,000,000.00.</span>
+							</fieldset>
+						</div>
+
+						<p class="snp-privacy-note">This calculator uses your entries to make an on-page estimate and does not submit them through calculator code. Existing site analytics behavior has not been verified.</p>
+					</section>
+
+					<aside class="snp-result-panel" aria-labelledby={`${idPrefix}-results-title`}>
+						<div class="snp-result-heading">
+							<p class="snp-eyebrow">Your estimate</p>
+							<h2 id={`${idPrefix}-results-title`}>Estimated proceeds</h2>
+						</div>
+						<div class="snp-result-prompt" data-result-prompt>
+							<h3>Start with an expected sale price</h3>
+							<p>Your estimate will appear here as you enter the amounts you know.</p>
+						</div>
+						<div class="snp-result-invalid" data-result-invalid hidden>
+							<h3>Review the highlighted amounts</h3>
+							<p>Correct each highlighted field to update the estimate. No previous result is shown while an amount is invalid.</p>
+						</div>
+						<div class="snp-result-content" data-result-content hidden>
+							<div class="snp-result-ledger" data-result-ledger></div>
+							<div class="snp-omissions" data-omissions hidden>
+								<h3>Some costs are not included</h3>
+								<p data-omissions-copy></p>
+							</div>
+							<div class="snp-inactive-mode" data-inactive-mode hidden></div>
+							<p class="snp-negative-warning" data-negative-warning hidden></p>
+							<p class="snp-estimate-note">This is an estimate based on the amounts entered, not a final settlement statement. Actual amounts can vary.</p>
+						</div>
+						<p class="snp-live snp-visually-hidden" data-live role="status" aria-live="polite" aria-atomic="true"></p>
+					</aside>
+				</div>
+			</div>
+
+			{variant === 'compact' && (
+				<p class="snp-full-page-link"><a href={fullPageHref}>Open the full calculator page <span aria-hidden="true">↗</span></a></p>
+			)}
+		</div>
+	</section>
+
+	{variant === 'full' && (
+		<section class="snp-contact-band">
+			<div class="snp-wrap snp-contact-inner">
+				<div>
+					<p class="snp-eyebrow">A thoughtful next step</p>
+					<h2>Talk through your <em>selling plans.</em></h2>
+					<p>For a closer look at the costs in your situation, connect with our team.</p>
+				</div>
+				<a class="snp-contact-button" href="/contact-us/">Contact the team <span aria-hidden="true">→</span></a>
+			</div>
+		</section>
+	)}
+
+	<template data-payoff-template>
+		<div class="snp-field snp-added-payoff" data-payoff-row>
+			<label data-payoff-label></label>
+			<div class="snp-payoff-row-control">
+				<input data-additional-payoff data-base-describedby={`${idPrefix}-payoff-hint`} aria-describedby={`${idPrefix}-payoff-hint`} type="text" inputmode="decimal" autocomplete="off" spellcheck="false" />
+				<button class="snp-remove-payoff" type="button" data-remove-payoff>Remove</button>
+			</div>
+			<span class="snp-error" data-payoff-error></span>
+		</div>
+	</template>
+</div>
+
+<script>
+	import { calculateSellerNetProceeds, formatCurrencyCents, parseCurrencyCents, type ClosingCostMode, type SellerNetProceedsInput, type SellerNetProceedsResult } from '../../lib/seller-net-proceeds';
+
+	function initializeCalculators() {
+		document.querySelectorAll<HTMLElement>('[data-snp-calculator]').forEach((root) => {
+			if (root.dataset.bound === 'true') return;
+			root.dataset.bound = 'true';
+
+			const one = <T extends Element>(selector: string) => root.querySelector<T>(selector);
+			const many = <T extends Element>(selector: string) => Array.from(root.querySelectorAll<T>(selector));
+			const addPayoffButton = one<HTMLButtonElement>('[data-add-payoff]');
+			const payoffList = one<HTMLElement>('[data-payoff-list]');
+			const payoffTemplate = one<HTMLTemplateElement>('[data-payoff-template]');
+			const resultPrompt = one<HTMLElement>('[data-result-prompt]');
+			const resultInvalid = one<HTMLElement>('[data-result-invalid]');
+			const resultContent = one<HTMLElement>('[data-result-content]');
+			const ledger = one<HTMLElement>('[data-result-ledger]');
+			const omissions = one<HTMLElement>('[data-omissions]');
+			const omissionsCopy = one<HTMLElement>('[data-omissions-copy]');
+			const inactiveMode = one<HTMLElement>('[data-inactive-mode]');
+			const negativeWarning = one<HTMLElement>('[data-negative-warning]');
+			const liveRegion = one<HTMLElement>('[data-live]');
+			let liveTimer: ReturnType<typeof setTimeout> | undefined;
+
+			const field = (key: string) => many<HTMLInputElement>('[data-field]').find((element) => element.dataset.field === key);
+			const getValue = (key: string) => field(key)?.value ?? '';
+			const setLive = (message: string) => {
+				if (!liveRegion) return;
+				if (liveTimer) clearTimeout(liveTimer);
+				liveTimer = setTimeout(() => { liveRegion.textContent = message; }, 450);
+			};
+
+			const resetErrors = () => {
+				many<HTMLInputElement>('[data-field], [data-additional-payoff], [data-comp-value]').forEach((input) => {
+					input.removeAttribute('aria-invalid');
+					const base = input.dataset.baseDescribedby;
+					if (base) input.setAttribute('aria-describedby', base);
+				});
+				many<HTMLElement>('[data-error-for], [data-payoff-error]').forEach((error) => { error.textContent = ''; });
+			};
+
+			const setFieldError = (key: string, message: string) => {
+				const input = many<HTMLInputElement>('[data-field], [data-additional-payoff]').find((element) => element.dataset.field === key && !element.closest('[hidden]'));
+			if (!input) return;
+			input.setAttribute('aria-invalid', 'true');
+			const error = many<HTMLElement>('[data-error-for], [data-payoff-error]').find((element) => element.dataset.errorFor === key || element.dataset.errorField === key);
+			if (error) {
+				error.textContent = message;
+				const describedBy = input.getAttribute('aria-describedby')?.split(/\s+/).filter(Boolean) ?? [];
+				if (error.id && !describedBy.includes(error.id)) describedBy.push(error.id);
+				if (describedBy.length) input.setAttribute('aria-describedby', describedBy.join(' '));
+			}
+		};
+
+			const updatePayoffRows = () => {
+				const rows = many<HTMLElement>('[data-payoff-row]');
+				rows.forEach((row, index) => {
+					const position = index + 1;
+					const key = `payoffs.additional.${index}`;
+					const label = row.querySelector<HTMLLabelElement>('[data-payoff-label]');
+					const input = row.querySelector<HTMLInputElement>('[data-additional-payoff]');
+					const error = row.querySelector<HTMLElement>('[data-payoff-error]');
+					const remove = row.querySelector<HTMLButtonElement>('[data-remove-payoff]');
+					if (label) {
+						label.textContent = `Additional mortgage or HELOC payoff ${position}`;
+						label.htmlFor = `${root.dataset.instance}-additional-payoff-${position}`;
+					}
+					if (input) {
+						input.id = `${root.dataset.instance}-additional-payoff-${position}`;
+						input.dataset.field = key;
+						input.dataset.baseDescribedby = `${root.dataset.instance}-payoff-hint`;
+					}
+					if (error) {
+						error.id = `${root.dataset.instance}-additional-payoff-${position}-error`;
+						error.dataset.errorField = key;
+					}
+					if (remove) remove.setAttribute('aria-label', `Remove additional loan payoff ${position}`);
+				});
+				if (addPayoffButton) addPayoffButton.disabled = rows.length >= 8;
+			};
+
+			const currentMode = (): ClosingCostMode => {
+				const selected = one<HTMLInputElement>('[data-cost-mode]:checked')?.value;
+				return selected === 'detailed' ? 'detailed' : 'aggregate';
+			};
+
+			const refreshModePanels = () => {
+				const mode = currentMode();
+				many<HTMLElement>('[data-mode-panel]').forEach((panel) => { panel.hidden = panel.dataset.modePanel !== mode; });
+				many<HTMLElement>('[data-compensation]').forEach((group) => {
+					const selected = group.querySelector<HTMLInputElement>('[data-comp-mode]:checked')?.value === 'percent' ? 'percent' : 'dollars';
+					group.querySelectorAll<HTMLElement>('[data-comp-value-wrap]').forEach((wrap) => { wrap.hidden = wrap.dataset.compValueWrap !== selected; });
+				});
+			};
+
+			const readInput = (): SellerNetProceedsInput => {
+				const compensation = (name: string) => {
+					const group = one<HTMLElement>(`[data-compensation="${name}"]`);
+					const mode = group?.querySelector<HTMLInputElement>('[data-comp-mode]:checked')?.value === 'percent' ? 'percent' : 'dollars';
+					const value = group?.querySelector<HTMLInputElement>(`[data-comp-value="${mode}"]`)?.value ?? '';
+					return { mode, value } as const;
+				};
+				return {
+					salePrice: getValue('salePrice'),
+					payoffs: {
+						firstMortgage: getValue('payoffs.firstMortgage'),
+						additional: many<HTMLInputElement>('[data-additional-payoff]').map((input) => input.value),
+					},
+					closingCostMode: currentMode(),
+					aggregateClosingCosts: getValue('aggregateClosingCosts'),
+					detailedClosingCosts: {
+						listingCompensation: compensation('listingCompensation'),
+						buyerAgentCompensation: compensation('buyerAgentCompensation'),
+						titleEscrow: getValue('detailedClosingCosts.titleEscrow'),
+						propertyTaxHoaSettlement: getValue('detailedClosingCosts.propertyTaxHoaSettlement'),
+						concessions: getValue('detailedClosingCosts.concessions'),
+						repairsWarrantySurvey: getValue('detailedClosingCosts.repairsWarrantySurvey'),
+						other: getValue('detailedClosingCosts.other'),
+					},
+					otherExpenses: {
+						preparation: getValue('otherExpenses.preparation'),
+						moving: getValue('otherExpenses.moving'),
+						carrying: getValue('otherExpenses.carrying'),
+					},
+				};
+			};
+
+			const appendLedgerRow = (label: string, cents: bigint, kind: 'normal' | 'deduction' | 'total' | 'result') => {
+				if (!ledger) return;
+				const row = document.createElement('div');
+				row.className = `snp-ledger-row snp-ledger-${kind}`;
+				const name = document.createElement('span');
+				name.className = 'snp-ledger-label';
+				name.textContent = label;
+				const value = document.createElement('span');
+				value.className = 'snp-ledger-value';
+				value.textContent = formatCurrencyCents(cents);
+				row.append(name, value);
+				ledger.append(row);
+			};
+
+			const appendLedgerSection = (label: string) => {
+				if (!ledger) return;
+				const heading = document.createElement('h3');
+				heading.className = 'snp-ledger-section-title';
+				heading.textContent = label;
+				ledger.append(heading);
+			};
+
+			const renderResult = (result: SellerNetProceedsResult) => {
+				if (!ledger) return;
+				ledger.replaceChildren();
+				appendLedgerRow('Expected sale price', result.salePriceCents, 'normal');
+
+				appendLedgerSection('Loan payoffs');
+				result.payoffLines.forEach((line) => appendLedgerRow(line.label, -line.cents, 'deduction'));
+				appendLedgerRow('Total loan payoffs', -result.totalPayoffsCents, 'total');
+
+				appendLedgerSection('Closing costs');
+			result.closingCostLines.forEach((line) => appendLedgerRow(line.label, -line.cents, 'deduction'));
+				appendLedgerRow('Total closing costs', -result.totalClosingCostsCents, 'total');
+				appendLedgerRow('Estimated cash at closing', result.cashAtClosingCents, 'result');
+
+				appendLedgerSection('Other expenses around your move');
+				result.otherExpenseLines.forEach((line) => appendLedgerRow(line.label, -line.cents, 'deduction'));
+				appendLedgerRow('Total other expenses', -result.totalOtherExpensesCents, 'total');
+				appendLedgerRow('Estimated after other expenses', result.amountAfterOtherExpensesCents, 'result');
+
+				if (omissions && omissionsCopy) {
+					omissions.hidden = result.omittedFields.length === 0;
+					omissionsCopy.textContent = result.omittedFields.length
+						? `Blank amounts were left out: ${result.omittedFields.join(', ')}. Enter $0 when you know a listed amount does not apply.`
+						: '';
+				}
+				if (inactiveMode) {
+					inactiveMode.hidden = result.inactiveClosingCostMode === null;
+					inactiveMode.textContent = result.inactiveClosingCostMode === 'aggregate'
+						? 'Your saved one-total closing-cost amount is not counted while itemized costs are selected.'
+						: result.inactiveClosingCostMode === 'detailed'
+							? 'Your saved itemized closing-cost amounts are not counted while one-total costs are selected.'
+							: '';
+				}
+				if (negativeWarning) {
+					const cashShortfall = result.cashAtClosingCents < 0n;
+					const afterExpensesShortfall = result.amountAfterOtherExpensesCents < 0n;
+					negativeWarning.hidden = !cashShortfall && !afterExpensesShortfall;
+					negativeWarning.textContent = cashShortfall
+						? 'Estimated cash at closing is below $0. Additional funds may be needed to complete the sale.'
+						: afterExpensesShortfall
+							? 'After the other expenses entered, the estimate is below $0. Those amounts are separate from cash at closing.'
+							: '';
+				}
+				if (resultPrompt) resultPrompt.hidden = true;
+				if (resultInvalid) resultInvalid.hidden = true;
+				if (resultContent) resultContent.hidden = false;
+				setLive(`Estimate updated. Estimated cash at closing ${formatCurrencyCents(result.cashAtClosingCents)}. Estimated after other expenses ${formatCurrencyCents(result.amountAfterOtherExpensesCents)}.`);
+			};
+
+			const update = (announce = true) => {
+				resetErrors();
+				const input = readInput();
+				const salePrice = parseCurrencyCents(input.salePrice);
+				const outcome = calculateSellerNetProceeds(input);
+				if (salePrice.kind === 'blank') {
+					if (!outcome.ok) {
+						Object.entries(outcome.errors).filter(([key]) => key !== 'salePrice').forEach(([key, message]) => setFieldError(key, message));
+					}
+					if (resultPrompt) resultPrompt.hidden = false;
+					if (resultInvalid) resultInvalid.hidden = true;
+					if (resultContent) resultContent.hidden = true;
+					if (announce && !outcome.ok && Object.keys(outcome.errors).some((key) => key !== 'salePrice')) {
+						setLive('Correct the highlighted amounts, then enter an expected sale price to start an estimate.');
+					}
+					return;
+				}
+
+				if (!outcome.ok) {
+					Object.entries(outcome.errors).forEach(([key, message]) => setFieldError(key, message));
+					if (resultPrompt) resultPrompt.hidden = true;
+					if (resultInvalid) resultInvalid.hidden = false;
+					if (resultContent) resultContent.hidden = true;
+					if (announce) setLive(`${Object.keys(outcome.errors).length} amount${Object.keys(outcome.errors).length === 1 ? '' : 's'} need correction. Previous results are hidden.`);
+					return;
+				}
+				renderResult(outcome.result);
+			};
+
+			const onInput = (event: Event) => {
+				if ((event.target as HTMLElement).matches('[data-field], [data-additional-payoff], [data-comp-value]')) update();
+			};
+			const onChange = (event: Event) => {
+				if ((event.target as HTMLElement).matches('[data-cost-mode], [data-comp-mode]')) {
+					refreshModePanels();
+					update();
+				}
+			};
+			const onClick = (event: Event) => {
+				const target = event.target;
+				if (!(target instanceof Element)) return;
+				if (target.closest('[data-add-payoff]')) {
+					if (!payoffList || !payoffTemplate || many<HTMLElement>('[data-payoff-row]').length >= 8) return;
+					payoffList.append(payoffTemplate.content.cloneNode(true));
+					updatePayoffRows();
+					many<HTMLInputElement>('[data-additional-payoff]').at(-1)?.focus();
+					update();
+					return;
+				}
+				const removeButton = target.closest<HTMLButtonElement>('[data-remove-payoff]');
+				if (removeButton) {
+					const rowsBefore = many<HTMLElement>('[data-payoff-row]');
+					const removedIndex = rowsBefore.indexOf(removeButton.closest<HTMLElement>('[data-payoff-row]') as HTMLElement);
+					removeButton.closest('[data-payoff-row]')?.remove();
+					updatePayoffRows();
+					const rowsAfter = many<HTMLElement>('[data-payoff-row]');
+					const next = rowsAfter[Math.min(removedIndex, rowsAfter.length - 1)];
+					(next?.querySelector<HTMLInputElement>('[data-additional-payoff]') ?? addPayoffButton)?.focus();
+					update();
+				}
+			};
+
+			root.addEventListener('input', onInput);
+			root.addEventListener('change', onChange);
+			root.addEventListener('click', onClick);
+			refreshModePanels();
+			update(false);
+		});
+	}
+
+	initializeCalculators();
+	document.addEventListener('astro:page-load', initializeCalculators);
+</script>
+
+<style is:global>
+	.home-v2.snp-root{--snp-ink:#17151a;--snp-ivory:#f6f2ea;--snp-red:#d6323c;--snp-red-deep:#b4232c;--snp-paper:#fff;--snp-line:#e7e2d6;--snp-body:#3c3a41;--snp-muted:#706d76;color:var(--snp-body);font-family:'Inter Variable','Inter',system-ui,sans-serif}
+	.snp-root *{box-sizing:border-box}
+	.snp-root [hidden]{display:none!important}
+	.snp-wrap{width:min(100% - 48px,1200px);margin-inline:auto}
+	.snp-intro{background:var(--snp-ivory);padding:clamp(62px,8vw,104px) 0 clamp(56px,7vw,82px)}
+	.snp-eyebrow{margin:0 0 18px;color:var(--snp-red-deep);font-size:11px;font-weight:700;letter-spacing:.22em;text-transform:uppercase}
+	.snp-intro h1,.snp-contact-band h2{max-width:16ch;margin:0;color:var(--snp-ink);font-family:'Fraunces Variable','Fraunces',Georgia,serif;font-size:clamp(42px,6vw,76px);font-weight:300;letter-spacing:-.025em;line-height:1.02}
+	.snp-intro h1 em,.snp-section-intro h2 em,.snp-contact-band h2 em{color:var(--snp-red);font-weight:400}
+	.snp-intro-copy{max-width:63ch;margin:26px 0 0;color:var(--snp-body);font-size:clamp(16px,1.5vw,18px);line-height:1.72}
+	.snp-intro-note{margin:20px 0 0;color:var(--snp-muted);font-size:13px;line-height:1.6}
+	.snp-section-intro{padding:clamp(50px,6vw,76px) 0 34px}
+	.snp-section-intro h2{margin:0;color:var(--snp-ink);font-family:'Fraunces Variable','Fraunces',Georgia,serif;font-size:clamp(34px,4.4vw,56px);font-weight:300;letter-spacing:-.02em;line-height:1.08}
+	.snp-section-intro p:last-child{max-width:62ch;margin:18px 0 0;color:var(--snp-muted);font-size:16px;line-height:1.7}
+	.snp-calculator-section{padding:0 0 clamp(62px,8vw,100px);background:var(--snp-paper)}
+	.snp-calculator-shell{border:1px solid var(--snp-line);border-radius:20px;background:var(--snp-paper);overflow:hidden}
+	.snp-calculator-layout{display:grid;grid-template-columns:minmax(0,3fr) minmax(340px,2fr);align-items:stretch}
+	.snp-input-panel,.snp-result-panel{min-width:0;padding:clamp(22px,3vw,38px)}
+	.snp-input-panel{border-right:1px solid var(--snp-line)}
+	.snp-panel-heading{padding-bottom:28px;border-bottom:1px solid var(--snp-line)}
+	.snp-panel-heading .snp-eyebrow,.snp-result-heading .snp-eyebrow{margin-bottom:11px}
+	.snp-panel-heading h2,.snp-result-heading h2{margin:0;color:var(--snp-ink);font-family:'Fraunces Variable','Fraunces',Georgia,serif;font-size:clamp(27px,3vw,36px);font-weight:400;line-height:1.16}
+	.snp-panel-heading p:last-child{max-width:56ch;margin:13px 0 0;color:var(--snp-muted);font-size:13.5px;line-height:1.65}
+	.snp-fields{display:grid;gap:25px;padding-top:28px}
+	.snp-fieldset{min-width:0;margin:0;padding:0;border:0}
+	.snp-fieldset legend{width:100%;margin:0 0 9px;padding:0;color:var(--snp-ink);font-size:15px;font-weight:700;line-height:1.4}
+	.snp-field-note{display:block;margin:0 0 13px;color:var(--snp-muted);font-size:12.5px;line-height:1.55}
+	.snp-field{display:grid;gap:7px;min-width:0}
+	.snp-field>label,.snp-label{color:var(--snp-ink);font-size:13px;font-weight:600;line-height:1.45}
+	.snp-required{margin-left:6px;color:var(--snp-muted);font-size:11px;font-weight:500}
+	.snp-field input[type=text]{display:block;width:100%;min-width:0;min-height:48px;padding:11px 13px;border:1px solid #c9c4ba;border-radius:9px;background:var(--snp-paper);color:var(--snp-ink);font:500 15px/1.35 'Inter Variable','Inter',system-ui,sans-serif;font-variant-numeric:tabular-nums}
+	.snp-field input[type=text]:hover{border-color:#8a858d}
+	.snp-field input[type=text]:focus-visible,.snp-radio:focus-within,.snp-mini-radios label:focus-within,.snp-secondary-button:focus-visible,.snp-remove-payoff:focus-visible,.snp-contact-button:focus-visible,.snp-full-page-link a:focus-visible{outline:3px solid #8c1b24;outline-offset:3px}
+	.snp-field input[aria-invalid=true]{border-color:var(--snp-red-deep);box-shadow:0 0 0 1px var(--snp-red-deep)}
+	.snp-error{min-height:0;color:var(--snp-red-deep);font-size:12px;font-weight:600;line-height:1.45}
+	.snp-error:empty{display:none}
+	.snp-radio-row{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 18px}
+	.snp-radio{display:flex;min-height:48px;align-items:center;gap:9px;padding:10px 15px;border:1px solid var(--snp-line);border-radius:999px;background:var(--snp-paper);color:var(--snp-ink);cursor:pointer;font-size:13px;font-weight:600}
+	.snp-radio:has(input:checked){border-color:var(--snp-red-deep);background:#fbf1f0}
+	.snp-radio input,.snp-mini-radios input{width:18px;height:18px;margin:0;accent-color:var(--snp-red-deep)}
+	.snp-mode-panel{min-width:0;margin:0;padding:0;border:0}
+	.snp-mini-radios{display:flex;flex-wrap:wrap;gap:14px;margin:7px 0 11px}
+	.snp-mini-radios label{display:inline-flex;min-height:40px;align-items:center;gap:8px;color:var(--snp-body);cursor:pointer;font-size:12.5px;font-weight:500}
+	.snp-compensation{padding:16px 0;border-bottom:1px solid var(--snp-line)}
+	.snp-compensation:first-child{padding-top:2px}
+	.snp-compensation:last-of-type{border-bottom:0}
+	.snp-additional-payoffs{display:grid;gap:16px;margin-top:16px}
+	.snp-payoff-row-control{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px}
+	.snp-secondary-button,.snp-remove-payoff{display:inline-flex;min-height:44px;align-items:center;justify-content:center;padding:9px 15px;border:1px solid var(--snp-line);border-radius:999px;background:transparent;color:var(--snp-ink);cursor:pointer;font:600 12px/1.3 'Inter Variable','Inter',system-ui,sans-serif}
+	.snp-secondary-button{margin-top:15px}
+	.snp-secondary-button:hover,.snp-remove-payoff:hover{border-color:var(--snp-red-deep);color:var(--snp-red-deep)}
+	.snp-secondary-button:disabled{cursor:not-allowed;opacity:.55}
+	.snp-privacy-note{margin:30px 0 0;padding-top:20px;border-top:1px solid var(--snp-line);color:var(--snp-muted);font-size:11.5px;line-height:1.6}
+	.snp-result-panel{background:#fcfaf6}
+	.snp-result-heading{margin-bottom:22px}
+	.snp-result-prompt,.snp-result-invalid{padding:22px 20px;border:1px solid var(--snp-line);border-radius:14px;background:var(--snp-paper)}
+	.snp-result-prompt h3,.snp-result-invalid h3,.snp-omissions h3{margin:0;color:var(--snp-ink);font-family:'Fraunces Variable','Fraunces',Georgia,serif;font-size:22px;font-weight:400;line-height:1.2}
+	.snp-result-prompt p,.snp-result-invalid p{margin:10px 0 0;color:var(--snp-muted);font-size:13px;line-height:1.65}
+	.snp-result-ledger{display:grid;gap:0}
+	.snp-ledger-section-title{margin:20px 0 7px;padding-top:15px;border-top:1px solid var(--snp-line);color:var(--snp-ink);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+	.snp-ledger-section-title:first-of-type{margin-top:4px;padding-top:0;border-top:0}
+	.snp-ledger-row{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:7px 0;color:var(--snp-body);font-size:12.5px;line-height:1.45}
+	.snp-ledger-label{max-width:65%}
+	.snp-ledger-value{color:var(--snp-ink);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+	.snp-ledger-deduction .snp-ledger-value{color:var(--snp-muted)}
+	.snp-ledger-total{margin-top:2px;border-top:1px dashed #d8d2c7;font-weight:700}
+	.snp-ledger-result{margin-top:7px;padding:14px 15px;border-radius:12px;background:var(--snp-ink);color:var(--snp-ivory);font-size:13px;font-weight:600}
+	.snp-ledger-result .snp-ledger-value{color:var(--snp-ivory);font-family:'Fraunces Variable','Fraunces',Georgia,serif;font-size:clamp(21px,2.4vw,28px);font-weight:400;letter-spacing:-.02em}
+	.snp-omissions,.snp-inactive-mode,.snp-negative-warning{margin:20px 0 0;padding:15px 16px;border:1px solid #d8c7a4;border-radius:12px;background:#fffaf0;color:#51442b;font-size:12px;line-height:1.6}
+	.snp-omissions h3{font-family:'Inter Variable','Inter',system-ui,sans-serif;font-size:12px;font-weight:700}
+	.snp-omissions p{margin:7px 0 0}
+	.snp-inactive-mode{border-color:var(--snp-line);background:var(--snp-paper);color:var(--snp-muted)}
+	.snp-negative-warning{border-color:#dfa5a9;background:#fff2f1;color:#751a21;font-weight:600}
+	.snp-estimate-note{margin:17px 0 0;color:var(--snp-muted);font-size:11.5px;line-height:1.6}
+	.snp-full-page-link{margin:18px 0 0;text-align:center}
+	.home-v2 .snp-full-page-link a{display:inline-flex;min-height:44px;align-items:center;gap:8px;color:var(--snp-red-deep);font-size:13px;font-weight:700;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px}
+	.snp-contact-band{padding:clamp(54px,7vw,82px) 0;background:var(--snp-ivory)}
+	.snp-contact-inner{display:flex;align-items:center;justify-content:space-between;gap:30px}
+	.snp-contact-band h2{font-size:clamp(34px,4vw,50px)}
+	.snp-contact-band .snp-contact-inner>div>p:last-child{margin:17px 0 0;color:var(--snp-muted);font-size:15px;line-height:1.65}
+	.home-v2 .snp-contact-button{display:inline-flex;min-height:50px;flex:0 0 auto;align-items:center;justify-content:center;gap:10px;padding:14px 23px;border-radius:999px;background:var(--snp-red);color:#fff;font-size:13px;font-weight:700;text-decoration:none;transition:background .2s ease}
+	.home-v2 .snp-contact-button:hover{background:var(--snp-red-deep)}
+	.snp-compact{max-width:880px;margin-inline:auto;padding:12px}
+	.snp-compact .snp-wrap{width:100%;max-width:880px}
+	.snp-compact .snp-calculator-section{padding:0;background:transparent}
+	.snp-compact .snp-calculator-shell{border-radius:18px}
+	.snp-compact-header{padding:23px 28px 21px;border:1px solid var(--snp-ink);border-radius:18px 18px 0 0;background:var(--snp-ink);color:var(--snp-ivory)}
+	.snp-compact-header .snp-compact-brand{margin:0 0 7px;color:#e3bd77;font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase}
+	.snp-compact-header h2{margin:0;color:var(--snp-ivory);font-family:'Fraunces Variable','Fraunces',Georgia,serif;font-size:clamp(25px,4vw,36px);font-weight:300;line-height:1.1}
+	.snp-compact-header p:last-child{margin:8px 0 0;color:rgba(246,242,234,.75);font-size:12.5px;line-height:1.5}
+	.snp-compact .snp-calculator-shell{border-top:0;border-radius:0 0 18px 18px}
+	.snp-compact .snp-calculator-layout{grid-template-columns:minmax(0,1.2fr) minmax(280px,.8fr)}
+	.snp-compact .snp-input-panel,.snp-compact .snp-result-panel{padding:22px}
+	.snp-compact .snp-input-panel{border-right:1px solid var(--snp-line)}
+	.snp-compact .snp-panel-heading h2,.snp-compact .snp-result-heading h2{font-size:26px}
+	.snp-compact .snp-fields{gap:21px;padding-top:22px}
+	.snp-compact .snp-privacy-note{margin-top:22px}
+	.snp-compact .snp-result-heading{margin-bottom:17px}
+	.snp-compact .snp-full-page-link a{font-size:12px}
+	.snp-visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+	@media(max-width:900px){
+		.snp-calculator-layout,.snp-compact .snp-calculator-layout{grid-template-columns:minmax(0,1fr)}
+		.snp-input-panel,.snp-compact .snp-input-panel{border-right:0;border-bottom:1px solid var(--snp-line)}
+		.snp-result-panel{padding-top:28px}
+	}
+	@media(max-width:640px){
+		.snp-wrap{width:min(100% - 32px,1200px)}
+		.snp-intro{padding:54px 0 48px}
+		.snp-intro h1{font-size:clamp(39px,12vw,56px)}
+		.snp-section-intro{padding:48px 0 26px}
+		.snp-section-intro h2{font-size:clamp(33px,9vw,46px)}
+		.snp-input-panel,.snp-result-panel{padding:22px 18px}
+		.snp-calculator-shell{border-radius:16px}
+		.snp-contact-inner{align-items:flex-start;flex-direction:column}
+		.snp-compact{padding:8px}
+		.snp-compact-header{padding:20px 19px 18px}
+		.snp-compact .snp-input-panel,.snp-compact .snp-result-panel{padding:20px 16px}
+		.snp-payoff-row-control{grid-template-columns:minmax(0,1fr)}
+		.snp-remove-payoff{justify-self:start}
+		.snp-radio-row{gap:8px}
+		.snp-radio{padding:9px 12px;font-size:12px}
+	}
+	@media(prefers-reduced-motion:reduce){
+		.snp-root *, .snp-root *::before, .snp-root *::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}
+	}
+</style>
