@@ -252,6 +252,7 @@ const detailedMoneyFields = [
 			const payoffTemplate = one<HTMLTemplateElement>('[data-payoff-template]');
 			const resultPrompt = one<HTMLElement>('[data-result-prompt]');
 			const resultInvalid = one<HTMLElement>('[data-result-invalid]');
+			const resultPanel = one<HTMLElement>('.snp-result-panel');
 			const resultContent = one<HTMLElement>('[data-result-content]');
 			const ledger = one<HTMLElement>('[data-result-ledger]');
 			const omissions = one<HTMLElement>('[data-omissions]');
@@ -393,6 +394,18 @@ const detailedMoneyFields = [
 
 			const renderResult = (result: SellerNetProceedsResult) => {
 				if (!ledger) return;
+				const displayedAmounts = [
+					result.salePriceCents,
+					...result.payoffLines.map((line) => -line.cents),
+					-result.totalPayoffsCents,
+					...result.closingCostLines.map((line) => -line.cents),
+					-result.totalClosingCostsCents,
+					result.cashAtClosingCents,
+					...result.otherExpenseLines.map((line) => -line.cents),
+					-result.totalOtherExpensesCents,
+					result.amountAfterOtherExpensesCents,
+				];
+				resultPanel?.classList.toggle('snp-stacked-ledger', displayedAmounts.some((cents) => formatCurrencyCents(cents).length > 13));
 				ledger.replaceChildren();
 				appendLedgerRow('Expected sale price', result.salePriceCents, 'normal');
 
@@ -645,6 +658,10 @@ const detailedMoneyFields = [
 	@container (max-width:400px){
 		.snp-ledger-row{align-items:flex-start;flex-direction:column;gap:3px}
 		.snp-ledger-label,.snp-ledger-value{max-width:100%;text-align:left;white-space:normal;overflow-wrap:anywhere}
+	}
+	@container (max-width:430px){
+		.snp-result-panel.snp-stacked-ledger .snp-ledger-row{align-items:flex-start;flex-direction:column;gap:3px}
+		.snp-result-panel.snp-stacked-ledger .snp-ledger-label,.snp-result-panel.snp-stacked-ledger .snp-ledger-value{max-width:100%;text-align:left;white-space:normal;overflow-wrap:anywhere}
 	}
 	@container (max-width:640px){
 		.snp-compact .snp-calculator-layout{grid-template-columns:minmax(0,1fr)}
