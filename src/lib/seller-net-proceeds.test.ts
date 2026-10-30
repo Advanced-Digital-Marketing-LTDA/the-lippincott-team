@@ -29,6 +29,15 @@ function baseInput(): SellerNetProceedsInput {
 	};
 }
 
+function detailedInput(): SellerNetProceedsInput {
+	const input = baseInput();
+	input.closingCostMode = 'detailed';
+	input.detailedClosingCosts.listingCompensation = { mode: 'percent', value: '2' };
+	input.detailedClosingCosts.buyerAgentCompensation = { mode: 'dollars', value: '6000' };
+	input.detailedClosingCosts.other = '5000';
+	return input;
+}
+
 function result(input: SellerNetProceedsInput): SellerNetProceedsResult {
 	const outcome = calculateSellerNetProceeds(input);
 	if (!outcome.ok) throw new Error(`Unexpected validation errors: ${JSON.stringify(outcome.errors)}`);
@@ -44,12 +53,8 @@ test('aggregate cost mode subtracts shared first and additional loan payoffs', (
 });
 
 test('detailed mode substitutes itemized costs and rounds percentage lines once', () => {
-	const input = baseInput();
-	input.closingCostMode = 'detailed';
+	const input = detailedInput();
 	input.aggregateClosingCosts = '999999';
-	input.detailedClosingCosts.listingCompensation = { mode: 'percent', value: '2' };
-	input.detailedClosingCosts.buyerAgentCompensation = { mode: 'dollars', value: '6000' };
-	input.detailedClosingCosts.other = '5000';
 
 	const calculated = result(input);
 	assert.equal(calculated.totalClosingCostsCents, 1_900_000n);
@@ -59,11 +64,7 @@ test('detailed mode substitutes itemized costs and rounds percentage lines once'
 });
 
 test('other expenses are separate from cash at closing', () => {
-	const input = baseInput();
-	input.closingCostMode = 'detailed';
-	input.detailedClosingCosts.listingCompensation = { mode: 'percent', value: '2' };
-	input.detailedClosingCosts.buyerAgentCompensation = { mode: 'dollars', value: '6000' };
-	input.detailedClosingCosts.other = '5000';
+	const input = detailedInput();
 	input.otherExpenses.preparation = '3000';
 
 	const calculated = result(input);
