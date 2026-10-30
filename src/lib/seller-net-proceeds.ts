@@ -148,33 +148,27 @@ export function calculateSellerNetProceeds(input: SellerNetProceedsInput): Selle
 		salePriceCents = salePrice.value;
 	}
 
-	const parseOptionalMoney = (raw: string, field: string, label: string): bigint | undefined => {
+	type MoneyLineInput = { raw: string; field: string; label: string };
+	const addMoneyLine = (lines: CostLine[], { raw, field, label }: MoneyLineInput) => {
 		const parsed = parseCurrencyCents(raw);
 		if (parsed.kind === 'blank') {
 			omittedFields.push(label);
-			return undefined;
-		}
-		if (parsed.kind === 'invalid') {
+		} else if (parsed.kind === 'invalid') {
 			errors[field] = parsed.message;
-			return undefined;
+		} else {
+			lines.push({ field, label, cents: parsed.value });
 		}
-		return parsed.value;
-	};
-
-	const addMoneyLine = (lines: CostLine[], raw: string, field: string, label: string) => {
-		const cents = parseOptionalMoney(raw, field, label);
-		if (cents !== undefined) lines.push({ field, label, cents });
 	};
 
 	const payoffs = input.payoffs ?? { firstMortgage: '', additional: [] };
-	addMoneyLine(payoffLines, payoffs.firstMortgage, 'payoffs.firstMortgage', 'First mortgage payoff');
+	addMoneyLine(payoffLines, { raw: payoffs.firstMortgage, field: 'payoffs.firstMortgage', label: 'First mortgage payoff' });
 	(payoffs.additional ?? []).forEach((raw, index) => {
-		addMoneyLine(payoffLines, raw, `payoffs.additional.${index}`, `Additional loan payoff ${index + 1}`);
+		addMoneyLine(payoffLines, { raw, field: `payoffs.additional.${index}`, label: `Additional loan payoff ${index + 1}` });
 	});
 
-	const addDollarOrPercentLine = (entry: DollarOrPercentInput, field: string, label: string) => {
+	const addDollarOrPercentLine = (entry: DollarOrPercentInput, { field, label }: Pick<CostLine, 'field' | 'label'>) => {
 		if (entry.mode === 'dollars') {
-			addMoneyLine(closingCostLines, entry.value, `${field}.value`, label);
+			addMoneyLine(closingCostLines, { raw: entry.value, field: `${field}.value`, label });
 			return;
 		}
 		if (entry.mode !== 'percent') {
@@ -200,7 +194,7 @@ export function calculateSellerNetProceeds(input: SellerNetProceedsInput): Selle
 
 	let inactiveClosingCostMode: ClosingCostMode | null = null;
 	if (input.closingCostMode === 'aggregate') {
-		addMoneyLine(closingCostLines, input.aggregateClosingCosts, 'aggregateClosingCosts', 'Aggregate closing costs');
+		addMoneyLine(closingCostLines, { raw: input.aggregateClosingCosts, field: 'aggregateClosingCosts', label: 'Aggregate closing costs' });
 		const detailed = input.detailedClosingCosts;
 		if (
 			hasValue(detailed.listingCompensation.value) ||
@@ -216,21 +210,21 @@ export function calculateSellerNetProceeds(input: SellerNetProceedsInput): Selle
 	} else if (input.closingCostMode === 'detailed') {
 		if (hasValue(input.aggregateClosingCosts)) inactiveClosingCostMode = 'aggregate';
 		const detailed = input.detailedClosingCosts;
-		addDollarOrPercentLine(detailed.listingCompensation, 'detailedClosingCosts.listingCompensation', 'Listing-side compensation');
-		addDollarOrPercentLine(detailed.buyerAgentCompensation, 'detailedClosingCosts.buyerAgentCompensation', 'Buyer-agent compensation');
-		addMoneyLine(closingCostLines, detailed.titleEscrow, 'detailedClosingCosts.titleEscrow', 'Seller-paid title and escrow');
-		addMoneyLine(closingCostLines, detailed.propertyTaxHoaSettlement, 'detailedClosingCosts.propertyTaxHoaSettlement', 'Property-tax and HOA settlement');
-		addMoneyLine(closingCostLines, detailed.concessions, 'detailedClosingCosts.concessions', 'Concessions');
-		addMoneyLine(closingCostLines, detailed.repairsWarrantySurvey, 'detailedClosingCosts.repairsWarrantySurvey', 'Repairs, warranty, and survey');
-		addMoneyLine(closingCostLines, detailed.other, 'detailedClosingCosts.other', 'Other closing expenses');
+		addDollarOrPercentLine(detailed.listingCompensation, { field: 'detailedClosingCosts.listingCompensation', label: 'Listing-side compensation' });
+		addDollarOrPercentLine(detailed.buyerAgentCompensation, { field: 'detailedClosingCosts.buyerAgentCompensation', label: 'Buyer-agent compensation' });
+		addMoneyLine(closingCostLines, { raw: detailed.titleEscrow, field: 'detailedClosingCosts.titleEscrow', label: 'Seller-paid title and escrow' });
+		addMoneyLine(closingCostLines, { raw: detailed.propertyTaxHoaSettlement, field: 'detailedClosingCosts.propertyTaxHoaSettlement', label: 'Property-tax and HOA settlement' });
+		addMoneyLine(closingCostLines, { raw: detailed.concessions, field: 'detailedClosingCosts.concessions', label: 'Concessions' });
+		addMoneyLine(closingCostLines, { raw: detailed.repairsWarrantySurvey, field: 'detailedClosingCosts.repairsWarrantySurvey', label: 'Repairs, warranty, and survey' });
+		addMoneyLine(closingCostLines, { raw: detailed.other, field: 'detailedClosingCosts.other', label: 'Other closing expenses' });
 	} else {
 		errors.closingCostMode = 'Choose aggregate or detailed closing costs.';
 	}
 
 	const otherExpenses = input.otherExpenses ?? { preparation: '', moving: '', carrying: '' };
-	addMoneyLine(otherExpenseLines, otherExpenses.preparation, 'otherExpenses.preparation', 'Preparation expenses');
-	addMoneyLine(otherExpenseLines, otherExpenses.moving, 'otherExpenses.moving', 'Moving expenses');
-	addMoneyLine(otherExpenseLines, otherExpenses.carrying, 'otherExpenses.carrying', 'Carrying expenses');
+	addMoneyLine(otherExpenseLines, { raw: otherExpenses.preparation, field: 'otherExpenses.preparation', label: 'Preparation expenses' });
+	addMoneyLine(otherExpenseLines, { raw: otherExpenses.moving, field: 'otherExpenses.moving', label: 'Moving expenses' });
+	addMoneyLine(otherExpenseLines, { raw: otherExpenses.carrying, field: 'otherExpenses.carrying', label: 'Carrying expenses' });
 
 	if (Object.keys(errors).length > 0) return { ok: false, errors };
 
