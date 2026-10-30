@@ -184,6 +184,9 @@ const extAttrs = (link?: string | null) => linkTargetAttrs(link);
 						</div>
 					)}
 				</div>
+				{data.__typename === 'StandaloneSell' && (
+					<p class="sec-cta reveal"><a class="link-arrow" href="/seller-net-proceeds-calculator/">Estimate your potential sale proceeds <span aria-hidden="true">→</span></a></p>
+				)}
 			</div>
 		</section>
 	)}

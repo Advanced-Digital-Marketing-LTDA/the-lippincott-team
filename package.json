@@ -35,11 +35,12 @@
     "build:search": "tinacms search-index",
     "preview": "astro preview",
     "test:rich-text": "tsc --ignoreConfig --module nodenext --moduleResolution nodenext --target esnext --types node --outDir .launch/rich-text-test src/lib/rich-text.test.ts && node .launch/rich-text-test/rich-text.test.js",
+    "test:seller-net-proceeds": "tsc --ignoreConfig --module nodenext --moduleResolution nodenext --target esnext --types node --outDir .launch/seller-net-proceeds-test src/lib/seller-net-proceeds.test.ts && node --test .launch/seller-net-proceeds-test/seller-net-proceeds.test.js",
     "test:blog-schema": "tsc --ignoreConfig --module nodenext --moduleResolution nodenext --target esnext --types node --outDir .launch/blog-schema-test src/lib/blog-schema.test.ts && node --test .launch/blog-schema-test/blog-schema.test.js",
     "test:sierra": "tsc --ignoreConfig --module nodenext --moduleResolution nodenext --target esnext --types node --outDir .launch/sierra-test src/lib/sierra-contact.test.ts && node --test .launch/sierra-test/sierra-contact.test.js",
     "astro": "astro",
     "test:bunny-purge": "node --test scripts/bunny-purge.test.mjs",
-    "test": "pnpm test:sierra && pnpm test:rich-text && pnpm test:blog-schema && node --test scripts/*.test.mjs"
+    "test": "pnpm test:sierra && pnpm test:rich-text && pnpm test:seller-net-proceeds && pnpm test:blog-schema && node --test scripts/*.test.mjs"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^14.1.4",
