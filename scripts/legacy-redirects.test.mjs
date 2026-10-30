@@ -7,6 +7,8 @@ const redirects = [
 	{ source: '/agents/amy-lippincott/', destination: '/about/amy-lippincott-2/', file: 'agents/amy-lippincott.ts' },
 	{ source: '/contact/', destination: '/contact-us/', file: 'contact.ts' },
 	{ source: '/seller-net-proceeds-calculator/', destination: '/sell/seller-net-proceeds-calculator/', file: 'seller-net-proceeds-calculator.ts' },
+	{ source: '/sellers/home-sale-calculator/', destination: '/sell/seller-net-proceeds-calculator/', file: 'sellers/home-sale-calculator.ts' },
+	{ source: '/property-search/search-form/', destination: 'https://northwest-houston-ai-home-search.thelippincottteam.com/', file: 'property-search/search-form.ts' },
 	...legacyRedirects.map(([source, destination]) => ({
 		source,
 		destination,
@@ -76,4 +78,9 @@ test('/wp-content/uploads/2026/04/townelake2.jpg has a matching exact permanent 
 	const destination = '/uploads/2026/04/townelake2.jpg';
 	const rules = netlifyRules.filter(([from]) => from === source);
 	assert.deepEqual(rules, [[source, destination, '301']]);
+});
+
+test('/sellers/home-sale-calculator/ rule precedes the /sellers/* catch-all', () => {
+	const sources = netlifyRules.map(([from]) => from);
+	assert.ok(sources.indexOf('/sellers/home-sale-calculator/') < sources.indexOf('/sellers/*'));
 });
