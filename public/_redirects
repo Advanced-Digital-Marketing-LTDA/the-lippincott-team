@@ -21,6 +21,13 @@
 # Keep the previous calculator URL pointing to its location under Sellers.
 /seller-net-proceeds-calculator/  /sell/seller-net-proceeds-calculator/  301
 
+# Historical home-sale calculator now has a real calculator page. Listed above
+# /sellers/* because Netlify applies the first matching rule.
+/sellers/home-sale-calculator/  /sell/seller-net-proceeds-calculator/  301
+
+# Historical generic listing search form now points to the AI home search.
+/property-search/search-form/  https://northwest-houston-ai-home-search.thelippincottteam.com/  301
+
 # Legacy buyer/seller section URLs now live at /buy/ and /sell/.
 /buyers/*  /buy/  301
 /sellers/*  /sell/  301

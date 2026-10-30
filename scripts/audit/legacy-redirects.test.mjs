@@ -10,6 +10,7 @@ const redirects = [
 	['/agents/amy-lippincott/', '/about/amy-lippincott-2/'],
 	['/contact/', '/contact-us/'],
 	['/seller-net-proceeds-calculator/', '/sell/seller-net-proceeds-calculator/'],
+	['/sellers/home-sale-calculator/', '/sell/seller-net-proceeds-calculator/'],
 ];
 
 for (const [source, destination] of redirects) {
@@ -99,7 +100,6 @@ test('unrelated paths and unresolved property URLs keep their 404 responses', as
 	const paths = [
 		'/agents/', '/agents/other-agent/', '/agents/amy-lippincott/extra/',
 		'/agents/amy-lippincott-other/', '/contact/extra/', '/contact-other/',
-		'/property-search/search-form/',
 		'/property-search/detail/70/50208824/4710-oakbluff-court-fulshear-tx-77441/',
 		'/property-search/detail/70/50914160/5623-sycamore-creek-drive-houston-tx-77345/',
 		'/unknown-historical-url/',
