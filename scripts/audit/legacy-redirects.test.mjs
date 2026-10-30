@@ -9,6 +9,7 @@ const base = process.env.LEGACY_REDIRECTS_BASE || 'http://127.0.0.1:4321';
 const redirects = [
 	['/agents/amy-lippincott/', '/about/amy-lippincott-2/'],
 	['/contact/', '/contact-us/'],
+	['/seller-net-proceeds-calculator/', '/sell/seller-net-proceeds-calculator/'],
 ];
 
 for (const [source, destination] of redirects) {

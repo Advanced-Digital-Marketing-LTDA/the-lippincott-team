@@ -56,8 +56,8 @@ export type SellerNetProceedsOutcome =
 	| { ok: true; result: SellerNetProceedsResult };
 
 const MAX_INPUT_LENGTH = 128;
-/** Highest accepted amount is $1 trillion, far above a realistic residential estimate. */
-export const MAX_CURRENCY_CENTS = 100_000_000_000_000n;
+/** Highest accepted amount is $5 million. */
+export const MAX_CURRENCY_CENTS = 500_000_000n;
 const CURRENCY_PATTERN = /^\$?(?:(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{1,2})?|\.\d{1,2})$/;
 const PERCENT_PATTERN = /^(?:\d+(?:\.\d+)?|\.\d+)$/;
 
@@ -75,7 +75,7 @@ export function parseCurrencyCents(raw: string): ParseResult<bigint> {
 	const cents = centsText.padEnd(2, '0');
 	const amount = BigInt(dollars) * 100n + BigInt(cents || '0');
 	if (amount > MAX_CURRENCY_CENTS) {
-		return { kind: 'invalid', message: 'Enter an amount no greater than $1,000,000,000,000.00.' };
+		return { kind: 'invalid', message: 'Enter an amount no greater than $5,000,000.00.' };
 	}
 	return { kind: 'value', value: amount };
 }

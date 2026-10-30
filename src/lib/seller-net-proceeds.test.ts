@@ -139,9 +139,28 @@ test('currency parser handles grouped dollars and rejects malformed or negative 
 	assert.equal(parseCurrencyCents('-1.00').kind, 'invalid');
 	assert.equal(parseCurrencyCents('Infinity').kind, 'invalid');
 	assert.equal(parseCurrencyCents('1e309').kind, 'invalid');
-	assert.equal(parseCurrencyCents('1000000000000.00').kind, 'value');
-	assert.equal(parseCurrencyCents('1000000000000.01').kind, 'invalid');
-	assert.equal(MAX_CURRENCY_CENTS, 100_000_000_000_000n);
+	assert.equal(parseCurrencyCents('5000000.00').kind, 'value');
+	assert.equal(parseCurrencyCents('5000000.01').kind, 'invalid');
+	assert.equal(MAX_CURRENCY_CENTS, 500_000_000n);
+});
+
+test('sale price, payoffs, and closing costs enforce the five-million-dollar limit', () => {
+	const input = baseInput();
+	input.salePrice = '5,000,000.00';
+	input.payoffs.firstMortgage = '5,000,000.00';
+	input.payoffs.additional = [];
+	input.aggregateClosingCosts = '5,000,000.00';
+	assert.equal(result(input).cashAtClosingCents, -500_000_000n);
+
+	input.salePrice = '5000000.01';
+	input.payoffs.firstMortgage = '5000000.01';
+	input.aggregateClosingCosts = '5000000.01';
+	const outcome = calculateSellerNetProceeds(input);
+	assert.equal(outcome.ok, false);
+	if (outcome.ok) return;
+	for (const field of ['salePrice', 'payoffs.firstMortgage', 'aggregateClosingCosts']) {
+		assert.match(outcome.errors[field], /\$5,000,000\.00/);
+	}
 });
 
 test('percentage parser accepts the inclusive 0–100 range and rejects invalid values', () => {

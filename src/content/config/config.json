@@ -197,7 +197,13 @@
     },
     {
       "title": "Sellers",
-      "link": "/sell/"
+      "link": "/sell/",
+      "children": [
+        {
+          "title": "Seller Net Proceeds Calculator",
+          "link": "/sell/seller-net-proceeds-calculator/"
+        }
+      ]
     },
     {
       "title": "About",

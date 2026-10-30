@@ -6,6 +6,7 @@ import { legacyRedirects } from '../src/lib/legacy-redirect-data.mjs';
 const redirects = [
 	{ source: '/agents/amy-lippincott/', destination: '/about/amy-lippincott-2/', file: 'agents/amy-lippincott.ts' },
 	{ source: '/contact/', destination: '/contact-us/', file: 'contact.ts' },
+	{ source: '/seller-net-proceeds-calculator/', destination: '/sell/seller-net-proceeds-calculator/', file: 'seller-net-proceeds-calculator.ts' },
 	...legacyRedirects.map(([source, destination]) => ({
 		source,
 		destination,
