@@ -5,7 +5,7 @@ import { runInNewContext } from 'node:vm';
 import { test } from 'node:test';
 import { sanitizeHref, sanitizeImageSrc } from '@tinacms/astro/sanitize';
 import { parseCdnConfig, resolveMediaUrl } from './cdn-config.mjs';
-import { safeHref } from '../src/lib/url.ts';
+import { isExternal, safeHref } from '../src/lib/url.ts';
 
 const site = 'https://thelippincottteam.com';
 const path = '/uploads/2026/Photo%20One.webp?version=2#view';
@@ -61,7 +61,7 @@ for (const mode of ['full-site', 'media-only']) {
       const frontmatter = stripTypeScriptTypes(source.split('---')[1].replace(/^import .+;$/gm, ''));
       const expression = source.match(new RegExp(`${attribute}=\\{([^}]+)\\}`))[1];
       for (const url of [path, 'https://assets.tina.io/uploads/preview.png', 'tel:+17134941818', 'javascript:alert(1)', '//evil.test/a', 'data:image/svg+xml,evil']) {
-        const actual = runInNewContext(`${frontmatter}\n${expression}`, { Astro: { props: { url }, site: new URL(site), url: new URL(site) }, mediaUrl, safeHref, sanitizeHref, sanitizeImageSrc });
+        const actual = runInNewContext(`${frontmatter}\n${expression}`, { Astro: { props: { url }, site: new URL(site), url: new URL(site) }, mediaUrl, safeHref, isExternal, sanitizeHref, sanitizeImageSrc });
         const expectedSanitized = file === 'AboutIntroLink' && /^tel:/i.test(url) ? safeHref(url) : sanitizer(url);
         assert.equal(actual, mediaUrl(expectedSanitized));
       }
