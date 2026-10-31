@@ -98,7 +98,13 @@ export default defineConfig({
 	// between inline elements) to `'jsx'` (strip whitespace per JSX rules,
 	// which can glue adjacent inline elements together). Pin the v6 behavior.
 	compressHTML: true,
-	integrations: [mdx(), sitemap(), icon(), tina()],
+	integrations: [
+		mdx(),
+		// The form confirmation is a functional page, not a search landing page (LIP-91).
+		sitemap({ filter: (page) => new URL(page).pathname !== '/contact-us/thank-you/' }),
+		icon(),
+		tina(),
+	],
 	build: {
 		// Inline the (~10 KiB) bundled CSS into a <style> in <head> instead of a
 		// separate render-blocking <link>. Astro's default ('auto') only inlines
