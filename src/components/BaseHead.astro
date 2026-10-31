@@ -16,11 +16,13 @@ interface Props {
 	title: string;
 	description: string;
 	image?: string;
+	/** Keep the page out of search results (functional pages such as the form confirmation). */
+	noindex?: boolean;
 }
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
-const { title, description, image: rawImage } = Astro.props;
+const { title, description, image: rawImage, noindex = false } = Astro.props;
 const image = mediaUrl(rawImage?.trim() || '/logo.webp', mediaSite);
 ---
 
@@ -39,6 +41,7 @@ const image = mediaUrl(rawImage?.trim() || '/logo.webp', mediaSite);
 
 <!-- Canonical URL -->
 <link rel="canonical" href={canonicalURL} />
+{noindex && <meta name="robots" content="noindex" />}
 
 <!-- Primary Meta Tags -->
 <title>{title}</title>

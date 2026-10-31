@@ -15,6 +15,7 @@ const config = (await getConfig()).data?.config ?? null;
 	title={data.seoTitle?.trim() || 'Thank You | The Lippincott Team'}
 	description={data.description?.trim() || config?.seo?.description || ''}
 	image={data.socialImage ?? undefined}
+	noindex
 >
 	<TinaIsland name="standalone" wrapper={islands.standalone.wrapper} params={{ slug: 'thank-you' }} primary>
 		<StandaloneBody data={data} />

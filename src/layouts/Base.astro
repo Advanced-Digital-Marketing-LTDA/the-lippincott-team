@@ -12,9 +12,10 @@ interface Props {
 	title: string;
 	description: string;
 	image?: string;
+	noindex?: boolean;
 }
 
-const { title, description, image } = Astro.props;
+const { title, description, image, noindex } = Astro.props;
 const config = (await getConfig()).data?.config ?? null;
 
 const includeGtm =
@@ -44,7 +45,7 @@ const includeGtm =
 				<!-- End Google Tag Manager -->
 			</>
 		)}
-		<BaseHead title={title} description={description} image={image?.trim() || config?.seo?.socialImage?.trim() || undefined} />
+		<BaseHead title={title} description={description} image={image?.trim() || config?.seo?.socialImage?.trim() || undefined} noindex={noindex} />
 		{/* Per-page head additions (e.g. the homepage's LCP poster preload). */}
 		<slot name="head" />
 		{/* .home-v2 pages hide .reveal sections until their motion JS runs;

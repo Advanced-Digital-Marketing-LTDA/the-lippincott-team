@@ -9,6 +9,7 @@ Object.assign(process.env, loadEnv(process.env.NODE_ENV || 'development', proces
 
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
+import { includeInSitemap } from './src/lib/sitemap-filter.mjs';
 import icon from 'astro-icon';
 import tina from '@tinacms/astro/integration';
 import { tinaAdminDevRedirect } from '@tinacms/astro/vite';
@@ -98,7 +99,12 @@ export default defineConfig({
 	// between inline elements) to `'jsx'` (strip whitespace per JSX rules,
 	// which can glue adjacent inline elements together). Pin the v6 behavior.
 	compressHTML: true,
-	integrations: [mdx(), sitemap(), icon(), tina()],
+	integrations: [
+		mdx(),
+		sitemap({ filter: includeInSitemap }),
+		icon(),
+		tina(),
+	],
 	build: {
 		// Inline the (~10 KiB) bundled CSS into a <style> in <head> instead of a
 		// separate render-blocking <link>. Astro's default ('auto') only inlines
