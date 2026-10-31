@@ -5,7 +5,7 @@ import { tinaField } from '@tinacms/astro/tina-field';
 import Section from '../ui/Section.astro';
 import Icon from '../ui/Icon.astro';
 import type { CalloutBlock } from '../../lib/data';
-import { safeHref } from '../../lib/url';
+import { isExternal, safeHref } from '../../lib/url';
 
 interface Props { data: CalloutBlock }
 
@@ -14,7 +14,7 @@ const url = mediaUrl(safeHref(data.url), mediaSite);
 ---
 <Section class="py-6 md:py-6">
 	{url ? (
-		<a href={url} data-tina-field={tinaField(data, 'url')} class="hover:bg-background bg-muted group mx-auto flex w-fit items-center gap-4 rounded-full border p-1 pl-4 shadow-md transition-colors duration-300">
+		<a href={url} {...(isExternal(data.url) ? { target: '_blank', rel: 'noopener' } : {})} data-tina-field={tinaField(data, 'url')} class="hover:bg-background bg-muted group mx-auto flex w-fit items-center gap-4 rounded-full border p-1 pl-4 shadow-md transition-colors duration-300">
 			<span data-tina-field={tinaField(data, 'text')} class="text-foreground text-sm">{data.text}</span>
 			<span class="block h-4 w-0.5 border-l bg-background"></span>
 			<div class="bg-background flex size-6 items-center justify-center rounded-full">
