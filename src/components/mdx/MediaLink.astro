@@ -1,8 +1,11 @@
 ---
 import { sanitizeHref } from '@tinacms/astro/sanitize';
 import { mediaUrl } from '../../lib/media';
+import { isExternal } from '../../lib/url';
 interface Props { url: string }
 const { url } = Astro.props;
-const href = mediaUrl(sanitizeHref(url), Astro.site?.href ?? Astro.url.origin);
+const sanitizedHref = sanitizeHref(url);
+const href = mediaUrl(sanitizedHref, Astro.site?.href ?? Astro.url.origin);
+const externalAttrs = isExternal(sanitizedHref) ? { target: '_blank', rel: 'noopener' } : {};
 ---
-<a href={href}><slot /></a>
+<a href={href} {...externalAttrs}><slot /></a>

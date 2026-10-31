@@ -3,7 +3,7 @@ import { mediaUrl } from '../../lib/media';
 const mediaSite = Astro.site?.href ?? Astro.url.origin;
 import { getConfig, getPage } from '../../lib/data';
 import type { DataTableBlock, PageBlock } from '../../lib/data';
-import { safeHref } from '../../lib/url';
+import { isExternal, safeHref } from '../../lib/url';
 import { richTextToPlainText } from '../../lib/rich-text';
 
 const normalizedAnchor = (value?: string | null) => value?.trim().replace(/^#/, '');
@@ -85,5 +85,5 @@ const linkHref = mediaUrl(safeHref(labels?.link), mediaSite) ?? '/northwest-hous
 			))}
 		</tbody>
 	</table>
-	<p><a href={linkHref}>{labels?.linkLabel ?? 'Sources & full comparison'}</a></p>
+	<p><a href={linkHref} {...(isExternal(labels?.link) ? { target: '_blank', rel: 'noopener' } : {})}>{labels?.linkLabel ?? 'Sources & full comparison'}</a></p>
 </section>}
