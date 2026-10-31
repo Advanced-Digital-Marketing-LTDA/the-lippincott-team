@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
+import { includeInSitemap } from '../src/lib/sitemap-filter.mjs';
 
 // LIP-91: the consultation confirmation is a functional page, so it carries
 // noindex and stays out of the sitemap, while every other page stays indexable.
@@ -32,12 +33,9 @@ test('layout forwards noindex to the head, which emits robots noindex only when 
 });
 
 test('sitemap filter drops only the thank-you path', () => {
-	const config = read('astro.config.mjs');
-	const body = config.match(/sitemap\(\{ filter: \(page\) => ([^}]+) \}\)/)?.[1];
-	assert.ok(body, 'sitemap() must declare a filter');
-	const filter = new Function('page', `return ${body};`);
-	assert.equal(filter('https://thelippincottteam.com/contact-us/thank-you/'), false);
-	assert.equal(filter('https://thelippincottteam.com/contact-us/'), true);
-	assert.equal(filter('https://thelippincottteam.com/'), true);
-	assert.equal(filter('https://thelippincottteam.com/blog/how-real-estate-agents-price-homes/'), true);
+	assert.match(read('astro.config.mjs'), /sitemap\(\{ filter: includeInSitemap \}\)/);
+	assert.equal(includeInSitemap('https://thelippincottteam.com/contact-us/thank-you/'), false);
+	assert.equal(includeInSitemap('https://thelippincottteam.com/contact-us/'), true);
+	assert.equal(includeInSitemap('https://thelippincottteam.com/'), true);
+	assert.equal(includeInSitemap('https://thelippincottteam.com/blog/how-real-estate-agents-price-homes/'), true);
 });

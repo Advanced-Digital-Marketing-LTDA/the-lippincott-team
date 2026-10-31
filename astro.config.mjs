@@ -9,6 +9,7 @@ Object.assign(process.env, loadEnv(process.env.NODE_ENV || 'development', proces
 
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
+import { includeInSitemap } from './src/lib/sitemap-filter.mjs';
 import icon from 'astro-icon';
 import tina from '@tinacms/astro/integration';
 import { tinaAdminDevRedirect } from '@tinacms/astro/vite';
@@ -100,8 +101,7 @@ export default defineConfig({
 	compressHTML: true,
 	integrations: [
 		mdx(),
-		// The form confirmation is a functional page, not a search landing page (LIP-91).
-		sitemap({ filter: (page) => new URL(page).pathname !== '/contact-us/thank-you/' }),
+		sitemap({ filter: includeInSitemap }),
 		icon(),
 		tina(),
 	],
