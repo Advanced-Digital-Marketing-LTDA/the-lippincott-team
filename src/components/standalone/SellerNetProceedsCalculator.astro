@@ -35,16 +35,6 @@ const detailedMoneyFields = [
 		</header>
 	)}
 
-	{variant === 'full' && (
-		<section class="snp-section-intro">
-			<div class="snp-wrap">
-				<p class="snp-eyebrow">Use your own estimates</p>
-				<h2>Add the numbers <em>you know.</em></h2>
-				<p>There are no preset commission rates or closing-cost assumptions. Enter a total or estimate the cost categories one by one.</p>
-			</div>
-		</section>
-	)}
-
 	<section class="snp-calculator-section" aria-label="Seller net proceeds calculator">
 		<div class="snp-wrap">
 			<div class="snp-calculator-shell">
@@ -211,6 +201,16 @@ const detailedMoneyFields = [
 			)}
 		</div>
 	</section>
+
+	{variant === 'full' && (
+		<section class="snp-section-intro">
+			<div class="snp-wrap">
+				<p class="snp-eyebrow">Use your own estimates</p>
+				<h2>Add the numbers <em>you know.</em></h2>
+				<p>There are no preset commission rates or closing-cost assumptions. Enter a total or estimate the cost categories one by one.</p>
+			</div>
+		</section>
+	)}
 
 	{variant === 'full' && (
 		<section class="snp-contact-band">
