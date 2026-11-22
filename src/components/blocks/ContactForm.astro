@@ -49,7 +49,10 @@ const editedInterests = (data.interestOptions ?? []).flatMap((o) =>
 	o?.label?.trim() && o.leadType ? [{ label: o.label.trim(), leadType: o.leadType }] : []);
 const interestOptions = editedInterests.length > 0 ? editedInterests : DEFAULT_INTEREST_OPTIONS;
 
-const editedAssurances = (data.assurances ?? []).flatMap((a) => (a?.title ? [{ title: a.title, body: a.body ?? '' }] : []));
+// reCAPTCHA v3 site key (public, build-time). Unset = the form submits without a token.
+const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || undefined;
+
+const editedAssurances =(data.assurances ?? []).flatMap((a) => (a?.title ? [{ title: a.title, body: a.body ?? '' }] : []));
 const assurances = editedAssurances.length > 0 ? editedAssurances : [
 	{ title: 'Free consultation', body: 'Pricing analysis and neighborhood comparisons cost nothing.' },
 	{ title: 'One business day', body: 'A named specialist responds, not an autoresponder.' },
@@ -72,7 +75,7 @@ const assurances = editedAssurances.length > 0 ? editedAssurances : [
 			{/* Submissions POST to /api/contact, which forwards the lead to Sierra on
 		   every host (Netlify, Coolify, the standalone Node server). The hidden
 		   bot-field is a honeypot the endpoint silently drops. */}
-			<form name="contact" method="POST" action="/api/contact" class="rounded-2xl border border-border bg-background p-6 sm:p-10" data-tina-field={tinaField(data, 'form')}>
+			<form name="contact" method="POST" action="/api/contact" class="rounded-2xl border border-border bg-background p-6 sm:p-10" data-recaptcha-site-key={recaptchaSiteKey} data-tina-field={tinaField(data, 'form')}>
 				<input type="hidden" name="form-name" value="contact" />
 				<p class="hidden" aria-hidden="true">
 					<label>Don’t fill this out if you’re human: <input name="bot-field" /></label>
@@ -156,11 +159,22 @@ const assurances = editedAssurances.length > 0 ? editedAssurances : [
 		// Bound on astro:page-load so a form swapped in by <ClientRouter/> also
 		// gets its submit listener (the per-node dataset guard prevents
 		// double-binding when the same node persists).
+		// Load Google's script once, on first interaction, then mint a v3 token per submit.
+		let recaptchaLoad: Promise<void> | undefined;
+		const loadRecaptcha = (siteKey: string) => (recaptchaLoad ??= new Promise<void>((resolve, reject) => {
+			const script = document.createElement('script');
+			script.src = `https://www.google.com/recaptcha/api.js?render=${siteKey}`;
+			script.onload = () => resolve();
+			script.onerror = () => { recaptchaLoad = undefined; reject(new Error('reCAPTCHA failed to load')); };
+			document.head.append(script);
+		}));
 		const bindContactForm = () => {
 			const form = document.querySelector<HTMLFormElement>('form[name="contact"]');
 			const errorBox = document.getElementById('contact-error');
 			if (!form || form.dataset.bound) return;
 			form.dataset.bound = '1';
+			const siteKey = form.dataset.recaptchaSiteKey;
+			if (siteKey) form.addEventListener('focusin', () => loadRecaptcha(siteKey).catch(() => {}), { once: true });
 			const showError = (message: string) => {
 				if (!errorBox) return;
 				errorBox.textContent = message;
@@ -172,7 +186,14 @@ const assurances = editedAssurances.length > 0 ? editedAssurances : [
 				const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
 				if (button) button.disabled = true;
 				try {
-					const response = await fetch('/api/contact', { method: 'POST', body: new FormData(form) });
+					const body = new FormData(form);
+					if (siteKey) {
+						await loadRecaptcha(siteKey);
+						const { grecaptcha } = window as unknown as { grecaptcha: { ready(cb: () => void): void; execute(key: string, opts: { action: string }): Promise<string> } };
+						await new Promise<void>((ready) => grecaptcha.ready(ready));
+						body.set('g-recaptcha-response', await grecaptcha.execute(siteKey, { action: 'contact' }));
+					}
+					const response = await fetch('/api/contact', { method: 'POST', body });
 					if (response.redirected) {
 						window.location.assign(response.url);
 						return;

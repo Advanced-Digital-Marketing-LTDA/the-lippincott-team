@@ -164,6 +164,34 @@ async function parseContactForm(
 	return { kind: 'ok', data };
 }
 
+// reCAPTCHA v3 server check. Enforced only when RECAPTCHA_SECRET_KEY is set, so
+// local dev and unconfigured hosts keep working. Fails closed on any Google error.
+const RECAPTCHA_MIN_SCORE = 0.5;
+async function recaptchaPassed(token: string | undefined, secret: string) {
+	if (!token) return false;
+	try {
+		const response = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+			method: 'POST',
+			body: new URLSearchParams({ secret, response: token }),
+		});
+		const result = await response.json();
+		return result.success === true && result.action === 'contact' && result.score >= RECAPTCHA_MIN_SCORE;
+	} catch {
+		return false;
+	}
+}
+
+// Reference the exact key, never bare `import.meta.env`: Vite would inline the whole
+// object, including private .env values, into the server bundle. Plain Node has no
+// import.meta.env (the route tests), so that throws and falls back to process.env.
+function buildTimeSiteKey() {
+	try {
+		return import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY;
+	} catch {
+		return undefined;
+	}
+}
+
 export const POST: APIRoute = async ({ request, clientAddress }) => {
 	// Browser CSRF guard first: reject cross-origin form posts before they
 	// consume rate-limit budget or touch Sierra.
@@ -186,6 +214,16 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
 
 	if (data['form-name'] !== 'contact') {
 		return jsonError(400, 'Unknown form.');
+	}
+
+	const recaptchaSecret = process.env.RECAPTCHA_SECRET_KEY;
+	// The site key is inlined at build time (process.env is the test/dev fallback). A secret
+	// without it means this build's form can never send a token, so skip rather than drop every lead.
+	const recaptchaSiteKey = buildTimeSiteKey() || process.env.PUBLIC_RECAPTCHA_SITE_KEY;
+	if (recaptchaSecret && !recaptchaSiteKey) {
+		console.error('[contact] RECAPTCHA_SECRET_KEY is set but this build has no PUBLIC_RECAPTCHA_SITE_KEY; skipping reCAPTCHA. Rebuild with the site key.');
+	} else if (recaptchaSecret && !(await recaptchaPassed(data['g-recaptcha-response'], recaptchaSecret))) {
+		return jsonError(400, "We couldn't verify your submission. Please try again, or call or text us directly.");
 	}
 
 	const apiKey = process.env.SIERRA_API_KEY;

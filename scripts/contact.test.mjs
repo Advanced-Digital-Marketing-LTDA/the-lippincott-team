@@ -39,12 +39,12 @@ async function setup(t, loader) {
 	let requestId = 0;
 	return {
 		leads,
-		submit: (interest) => POST({
+		submit: (interest, extra = {}) => POST({
 			clientAddress: `192.0.2.${++requestId}`,
 			request: new Request('https://thelippincottteam.com/api/contact', {
 				method: 'POST',
 				body: new URLSearchParams({
-					'form-name': 'contact', name: 'Test Person', email: 'test@example.com', interest,
+					'form-name': 'contact', name: 'Test Person', email: 'test@example.com', interest, ...extra,
 				}),
 			}),
 		}),
@@ -122,4 +122,28 @@ test('shares an in-flight lookup and caches a successful result until expiry', a
 	assert.deepEqual((await Promise.all([first, second])).map((r) => r.status), [303, 303]);
 	assert.equal((await submit(customValue)).status, 303);
 	assert.equal(loads, 1);
+});
+
+test('enforces reCAPTCHA v3 only when the secret is set', async (t) => {
+	const { submit, leads } = await setup(t, async () => []);
+	assert.equal((await submit('2|Sell my home')).status, 303);
+	process.env.RECAPTCHA_SECRET_KEY = 'test-secret';
+	t.after(() => { delete process.env.RECAPTCHA_SECRET_KEY; delete process.env.PUBLIC_RECAPTCHA_SITE_KEY; });
+	// Secret without a site key: reCAPTCHA is skipped so a half-configured deploy keeps leads flowing.
+	t.mock.method(console, 'error', () => {});
+	assert.equal((await submit('2|Sell my home')).status, 303);
+	process.env.PUBLIC_RECAPTCHA_SITE_KEY = 'test-site-key';
+	let verdict;
+	const leadFetch = globalThis.fetch;
+	t.mock.method(globalThis, 'fetch', (input, init) =>
+		String(input).includes('recaptcha/api/siteverify') ? Response.json(verdict) : leadFetch(input, init));
+	const token = { 'g-recaptcha-response': 'tok' };
+	assert.equal((await submit('2|Sell my home')).status, 400);
+	for (verdict of [{ success: false }, { success: true, action: 'contact', score: 0.1 }, { success: true, action: 'other', score: 0.9 }]) {
+		assert.equal((await submit('2|Sell my home', token)).status, 400);
+	}
+	assert.equal(leads.length, 2);
+	verdict = { success: true, action: 'contact', score: 0.9 };
+	assert.equal((await submit('2|Sell my home', token)).status, 303);
+	assert.equal(leads.length, 3);
 });

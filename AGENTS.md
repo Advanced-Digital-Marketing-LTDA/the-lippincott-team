@@ -385,7 +385,7 @@ true and `CONTEXT` is unset or `production`; Netlify previews and branch deploys
 are excluded. Analytics tags are managed through GTM; no GA4/gtag.js tag is
 embedded directly in the site.
 
-Environment variables (see `.env.example`). Shared rule for the secrets (`SIERRA_API_KEY`,
+Environment variables (see `.env.example`). Shared rule for the secrets (`SIERRA_API_KEY`, `RECAPTCHA_SECRET_KEY`,
 `BUNNY_API_KEY`, `BUNNY_PULL_ZONE_ID`, `BUNNY_PURGE_SECRET`): never commit, never `PUBLIC_` prefix, and
 on Coolify keep the Build Variable flag **off** (runtime-only).
 
@@ -394,6 +394,8 @@ on Coolify keep the Build Variable flag **off** (runtime-only).
 - `PUBLIC_TINA_CLIENT_ID`, `TINA_TOKEN` — TinaCloud credentials, required for `pnpm build` everywhere
   (Netlify, Coolify Docker, local).
 - `SIERRA_API_KEY` — Sierra lead-forwarding key for `/api/contact` (all platforms).
+- `PUBLIC_RECAPTCHA_SITE_KEY` (public, build-time) + `RECAPTCHA_SECRET_KEY` (runtime secret) — optional reCAPTCHA v3
+  for the contact form. `/api/contact` verifies the token (action `contact`, score ≥ 0.5) only when the secret is set.
 - `CONTACT_ALLOWED_ORIGINS` — optional comma-separated extra origins allowed to submit the contact form,
   besides `SITE_URL`, the platform URL envs, and the hardcoded brand/localhost origins
   (`https://thelippincottteam.com` ± `www`, the old `lippincottteam.com` ± `www` pair while that domain
