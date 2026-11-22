@@ -14,6 +14,10 @@ FROM node:22-alpine AS base
 # scripts — its platform binaries come via optionalDependencies), kept to
 # make the "no lifecycle scripts" guarantee explicit.
 RUN npm install -g pnpm@10.34.5 --ignore-scripts
+# Registry/DNS blips (EAI_AGAIN, ECONNRESET) on the build host failed deploys at
+# pnpm's default 2 retries. Inherited by every stage; ~8 min of backoff per tarball.
+ENV npm_config_fetch_retries=5 \
+    npm_config_fetch_retry_maxtimeout=120000
 
 # ---------- deps: install the full dependency tree ----------
 FROM base AS deps
